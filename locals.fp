@@ -57,4 +57,16 @@ locals {
     or 
       tags is null
   EOQ
+
+  prohibited_tags_query = <<-EOQ
+    select
+      __TITLE__ as title,
+      arn,
+      region,
+      _ctx ->> 'connection_name' as cred
+    from
+      __TABLE_NAME__
+    where
+      tags ?| array['__PROHIBITED_TAGS__']
+  EOQ
 }

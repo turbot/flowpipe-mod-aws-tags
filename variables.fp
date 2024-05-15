@@ -36,3 +36,9 @@ variable "global_default_tags" {
     environment = "not set"
   }
 }
+
+variable "global_prohibited_tags" {
+  type        = list(string)
+  description = ""
+  default     = ["password", "secret", "private", "key"]
+}
