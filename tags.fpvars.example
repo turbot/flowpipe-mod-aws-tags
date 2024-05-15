@@ -1,0 +1,15 @@
+# Core options
+database           = "postgres:#steampipe@localhost:9193/steampipe"
+notifier           = "default"
+notification_level = "info"
+approvers          = []
+max_concurrency    = 1
+
+# Global
+global_default_tags = {
+  environment = "not set"
+  project     = "not set"
+}
+
+# S3
+s3_bucket_default_tags = {}
