@@ -1,0 +1,22 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Swap files
+*.swp
+
+# Ignore Apple custom attributes file
+.DS_Store
+
+# Flowpipe variable files
+*.fpvars
+
+# Flowpipe mod dependencies and logs
+.flowpipe
+*.cache.json
+
+# Flowpipe configuration files
+*.fpc
