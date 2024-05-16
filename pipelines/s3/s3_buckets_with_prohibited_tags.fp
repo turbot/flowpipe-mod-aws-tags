@@ -51,13 +51,13 @@ pipeline "detect_and_correct_s3_buckets_with_prohibited_tags" {
   param "default_action" {
     type        = string
     description = local.description_default_action
-    default     = var.s3_buckets_without_tags_default_action
+    default     = var.s3_buckets_with_prohibited_tags_default_action
   }
 
   param "enabled_actions" {
     type        = list(string)
     description = local.description_enabled_actions
-    default     = var.s3_buckets_without_tags_enabled_actions
+    default     = var.s3_buckets_with_prohibited_tags_enabled_actions
   }
 
   step "query" "detect" {
@@ -114,13 +114,13 @@ pipeline "correct_s3_buckets_with_prohibited_tags" {
   param "default_action" {
     type        = string
     description = local.description_default_action
-    default     = var.s3_buckets_without_tags_default_action
+    default     = var.s3_buckets_with_prohibited_tags_default_action
   }
 
   param "enabled_actions" {
     type        = list(string)
     description = local.description_enabled_actions
-    default     = var.s3_buckets_without_tags_enabled_actions
+    default     = var.s3_buckets_with_prohibited_tags_enabled_actions
   }
 
   step "message" "notify_detection_count" {
@@ -136,7 +136,7 @@ pipeline "correct_s3_buckets_with_prohibited_tags" {
   step "pipeline" "correct_item" {
     for_each        = step.transform.items_by_id.value
     max_concurrency = var.max_concurrency
-    pipeline        = pipeline.correct_one_s3_bucket_without_tags
+    pipeline        = pipeline.correct_one_s3_bucket_with_prohibited_tags
     args = {
       title              = each.value.title
       arn                = each.value.arn
@@ -198,13 +198,13 @@ pipeline "correct_one_s3_bucket_with_prohibited_tags" {
   param "default_action" {
     type        = string
     description = local.description_default_action
-    default     = var.s3_buckets_without_tags_default_action
+    default     = var.s3_buckets_with_prohibited_tags_default_action
   }
 
   param "enabled_actions" {
     type        = list(string)
     description = local.description_enabled_actions
-    default     = var.s3_buckets_without_tags_enabled_actions
+    default     = var.s3_buckets_with_prohibited_tags_enabled_actions
   }
 
   step "pipeline" "respond" {
@@ -213,7 +213,7 @@ pipeline "correct_one_s3_bucket_with_prohibited_tags" {
       notifier           = param.notifier
       notification_level = param.notification_level
       approvers          = param.approvers
-      detect_msg         = "Detected ${param.title} without tags."
+      detect_msg         = "Detected ${param.title} with prohibited tags."
       default_action     = param.default_action
       enabled_actions    = param.enabled_actions
       actions = {
@@ -225,7 +225,7 @@ pipeline "correct_one_s3_bucket_with_prohibited_tags" {
           pipeline_args = {
             notifier = param.notifier
             send     = param.notification_level == local.level_verbose
-            text     = "Skipped ${param.title} without tags."
+            text     = "Skipped ${param.title} with prohibited tags."
           }
           success_msg = ""
           error_msg   = ""

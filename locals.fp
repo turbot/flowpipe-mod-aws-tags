@@ -67,6 +67,6 @@ locals {
     from
       __TABLE_NAME__
     where
-      tags ?| array['__PROHIBITED_TAGS__']
+      tags ?| array[__PROHIBITED_TAGS__]
   EOQ
 }
