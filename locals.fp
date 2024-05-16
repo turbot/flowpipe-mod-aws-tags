@@ -26,6 +26,7 @@ locals {
   description_arn              = "The ARN of the resource."
   description_account_id       = "The account ID of the resource."
   description_tags             = "The tags to apply to or remove from the resource."
+  description_prohibited_tags  = "Prohibited tag keys to be removed from the resource."
   description_max_concurrency  = "The maximum concurrency to use for responding to detection items."
   description_notifier         = "The name of the notifier to use for sending notification messages."
   description_notifier_level   = "The verbosity level of notification messages to send. Valid options are 'verbose', 'info', 'error'."
@@ -55,7 +56,7 @@ locals {
     where
       tags = '{}'
     or 
-      tags is null
+      tags is null;
   EOQ
 
   prohibited_tags_query = <<-EOQ
@@ -63,10 +64,13 @@ locals {
       __TITLE__ as title,
       arn,
       region,
-      _ctx ->> 'connection_name' as cred
+      _ctx ->> 'connection_name' as cred,
+      json_agg(keys) as prohibited_tags
     from
-      __TABLE_NAME__
+      __TABLE_NAME__,
+      jsonb_object_keys(tags) as keys
     where
-      tags ?| array[__PROHIBITED_TAGS__]
+      lower(keys) = any (array[__PROHIBITED_TAGS__])
+    group by arn, region, cred, __ADDITIONAL_GROUP_BY__
   EOQ
 }

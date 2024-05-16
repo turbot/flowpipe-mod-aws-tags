@@ -1,3 +1,23 @@
+locals {
+  s3_buckets_with_prohibited_tags_query = replace(
+    replace(
+      replace(
+        replace(
+          local.prohibited_tags_query, 
+          "__TABLE_NAME__", 
+          "aws_s3_bucket"
+        ),
+        "__TITLE__", 
+        "concat('S3 Bucket ', name, ' [', region, '/', account_id, ']')"
+      ),
+      "__PROHIBITED_TAGS__", 
+      join(", ", formatlist("'%s'", [for tag in concat(var.global_prohibited_tags, var.s3_buckets_prohibited_tags) : lower(tag)]))
+    ),
+    "__ADDITIONAL_GROUP_BY__", 
+    "name, account_id"
+  )
+}
+
 trigger "query" "detect_and_correct_s3_buckets_with_prohibited_tags" {
   title         = "Detect & correct S3 buckets with prohibited tags"
   description   = "Detects S3 buckets which have prohibited tags and runs your chosen action."
@@ -7,13 +27,12 @@ trigger "query" "detect_and_correct_s3_buckets_with_prohibited_tags" {
   enabled  = var.s3_buckets_with_prohibited_tags_trigger_enabled
   schedule = var.s3_buckets_with_prohibited_tags_trigger_schedule
   database = var.database
-  sql      = local.s3_buckets_with_prohibited_tags_query_override
+  sql      = local.s3_buckets_with_prohibited_tags_query
 
   capture "insert" {
     pipeline = pipeline.correct_s3_buckets_with_prohibited_tags
     args = {
       items = self.inserted_rows
-      tags  = local.s3_buckets_prohibited_tags
     }
   }
 }
@@ -22,7 +41,7 @@ pipeline "detect_and_correct_s3_buckets_with_prohibited_tags" {
   title         = "Detect & correct S3 buckets with prohibited tags"
   description   = "Detects S3 buckets which have prohibited tags and runs your chosen action."
   // documentation = file("./pipelines/s3/docs/detect_and_correct_s3_buckets_with_prohibited_tags.md")
-  tags          = merge(local.s3_common_tags, { class = "prohibited" })
+  tags          = merge(local.s3_common_tags, { class = "prohibited", type = "featured" })
 
   param "database" {
     type        = string
@@ -62,7 +81,7 @@ pipeline "detect_and_correct_s3_buckets_with_prohibited_tags" {
 
   step "query" "detect" {
     database = param.database
-    sql      = local.s3_buckets_with_prohibited_tags_query_override
+    sql      = local.s3_buckets_with_prohibited_tags_query
   }
 
   step "pipeline" "respond" {
@@ -86,10 +105,11 @@ pipeline "correct_s3_buckets_with_prohibited_tags" {
 
   param "items" {
     type = list(object({
-      title      = string
-      arn        = string
-      region     = string
-      cred       = string
+      title           = string
+      arn             = string
+      region          = string
+      cred            = string
+      prohibited_tags = list(string)
     }))
   }
 
@@ -142,6 +162,7 @@ pipeline "correct_s3_buckets_with_prohibited_tags" {
       arn                = each.value.arn
       region             = each.value.region
       cred               = each.value.cred
+      prohibited_tags    = each.value.prohibited_tags
       notifier           = param.notifier
       notification_level = param.notification_level
       approvers          = param.approvers
@@ -175,6 +196,11 @@ pipeline "correct_one_s3_bucket_with_prohibited_tags" {
   param "cred" {
     type        = string
     description = local.description_credential
+  }
+
+  param "prohibited_tags" {
+    type        = list(string)
+    description = local.description_prohibited_tags
   }
 
   param "notifier" {
@@ -213,7 +239,7 @@ pipeline "correct_one_s3_bucket_with_prohibited_tags" {
       notifier           = param.notifier
       notification_level = param.notification_level
       approvers          = param.approvers
-      detect_msg         = "Detected ${param.title} with prohibited tags."
+      detect_msg         = "Detected ${param.title} with prohibited tags (${join(", ", param.prohibited_tags)})."
       default_action     = param.default_action
       enabled_actions    = param.enabled_actions
       actions = {
@@ -239,7 +265,7 @@ pipeline "correct_one_s3_bucket_with_prohibited_tags" {
             cred          = param.cred 
             region        = param.region
             resource_arns = [param.arn]
-            tag_keys      = local.s3_buckets_prohibited_tags
+            tag_keys      = param.prohibited_tags
           }
           success_msg = "Removed prohitbited tags from ${param.title}."
           error_msg   = "Error removing prohitbited tags from ${param.title}."
@@ -247,6 +273,12 @@ pipeline "correct_one_s3_bucket_with_prohibited_tags" {
       }
     }
   }
+}
+
+variable "s3_buckets_prohibited_tags" {
+  type        = list(string)
+  description = ""
+  default     = []
 }
 
 variable "s3_buckets_with_prohibited_tags_trigger_enabled" {
