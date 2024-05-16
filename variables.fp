@@ -42,3 +42,12 @@ variable "global_prohibited_tags" {
   description = ""
   default     = ["password", "secret", "private", "key"]
 }
+
+variable "global_mandatory_tags" {
+  type        = map(string)
+  description = ""
+  default     = {
+    environment = "not set"
+    owner       = "not set"
+  }
+}

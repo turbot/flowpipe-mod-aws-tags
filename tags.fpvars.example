@@ -19,4 +19,5 @@ global_prohibited_tags = [
 
 # S3
 s3_buckets_default_tags = {}
+s3_buckets_mandatory_tags = {}
 s3_buckets_prohibited_tags = []

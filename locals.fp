@@ -27,6 +27,7 @@ locals {
   description_account_id       = "The account ID of the resource."
   description_tags             = "The tags to apply to or remove from the resource."
   description_prohibited_tags  = "Prohibited tag keys to be removed from the resource."
+  description_missing_tags     = "The keys of the mandatory tags which haven't been applied to the resource."
   description_max_concurrency  = "The maximum concurrency to use for responding to detection items."
   description_notifier         = "The name of the notifier to use for sending notification messages."
   description_notifier_level   = "The verbosity level of notification messages to send. Valid options are 'verbose', 'info', 'error'."
@@ -72,5 +73,18 @@ locals {
     where
       lower(keys) = any (array[__PROHIBITED_TAGS__])
     group by arn, region, cred, __ADDITIONAL_GROUP_BY__
+  EOQ
+
+  mandatory_tags_query = <<-EOQ
+    select
+      __TITLE__ as title,
+      arn,
+      region,
+      _ctx ->> 'connection_name' as cred,
+      to_jsonb(array[__MANDATORY_TAGS__]) - array(select jsonb_object_keys(tags)) as missing_tags
+    from
+      __TABLE_NAME__
+    where
+      coalesce(tags ?& array[__MANDATORY_TAGS__], false) = false
   EOQ
 }
