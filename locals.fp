@@ -60,4 +60,17 @@ locals {
       lower(keys) = any (array[__PROHIBITED_TAGS__])
     group by arn, region, cred, __ADDITIONAL_GROUP_BY__
   EOQ
+
+  mandatory_tags_query = <<-EOQ
+    select
+      __TITLE__ as title,
+      arn,
+      region,
+      _ctx ->> 'connection_name' as cred,
+      to_jsonb(array[__MANDATORY_TAGS__]) - array(select jsonb_object_keys(tags)) as missing_tags
+    from
+      __TABLE_NAME__
+    where
+      coalesce(tags ?& array[__MANDATORY_TAGS__], false) = false
+  EOQ
 }

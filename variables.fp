@@ -30,6 +30,18 @@ variable "max_concurrency" {
 
 variable "global_prohibited_tag_keys" {
   type        = list(string)
-  description = ""
+  description = "" // TODO: Add description
   default     = ["password", "secret", "key"]
+}
+
+// TODO: Come up with a better way of getting default values for our mandatory tags (should these somehow be dynamic?)
+variable "global_mandatory_tags" {
+  type        = map(string)
+  description = "" // TODO: Add description
+  default     = {
+    environment = "not set"
+    owner       = "not set"
+    cost_center = "not set"
+    name        = "not set"
+  }
 }
