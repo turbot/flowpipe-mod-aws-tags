@@ -111,4 +111,42 @@ locals {
     group by title, arn, region, cred
     having count(key) > 0;
   EOQ
+
+  non_standardized_tags_query = <<-EOQ
+    WITH tag_mappings AS (
+      __TAG_MAPPINGS__
+    ),
+    expanded_tags AS (
+      SELECT
+        __TITLE__ AS title,
+        r.region,
+        r.arn,
+        r._ctx ->> 'connection_name' AS cred,
+        r.tags,
+        tk.key,
+        tk.value,
+        tm.new_key
+      FROM
+        __TABLE_NAME__ r,
+        jsonb_each_text(r.tags) AS tk(key, value)
+      LEFT JOIN
+        tag_mappings tm ON tk.key = ANY(SELECT jsonb_array_elements_text(tm.old_keys))
+    )
+    SELECT
+      e.title,
+      e.region,
+      e.arn,
+      e.cred,
+      jsonb_agg(e.key) AS invalid_tag_keys,
+      jsonb_object_agg(
+        COALESCE(e.new_key, e.key),
+        e.value
+      ) AS replacement_tags
+    FROM
+      expanded_tags e
+    WHERE
+      e.new_key IS NOT NULL
+    GROUP BY
+      e.title, e.region, e.arn, e.cred;
+  EOQ
 }
