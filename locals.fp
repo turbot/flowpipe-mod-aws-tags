@@ -28,6 +28,7 @@ locals {
   description_tags             = "The tags to apply to or remove from the resource."
   description_prohibited_tags  = "Prohibited tag keys to be removed from the resource."
   description_missing_tags     = "The keys of the mandatory tags which haven't been applied to the resource."
+  description_invalid_tags     = "The tags which are invalid and in need of remediation."
   description_max_concurrency  = "The maximum concurrency to use for responding to detection items."
   description_notifier         = "The name of the notifier to use for sending notification messages."
   description_notifier_level   = "The verbosity level of notification messages to send. Valid options are 'verbose', 'info', 'error'."
@@ -72,5 +73,42 @@ locals {
       __TABLE_NAME__
     where
       coalesce(tags ?& array[__MANDATORY_TAGS__], false) = false
+  EOQ
+
+  # Can swap the invalid tags column with jsonb_agg(jsonb_build_object(key, value)) as invalid_tags if we require a list of tags individually
+  incorrect_tag_key_casing_query = <<-EOQ
+    with tag_details as (
+      select
+        __TITLE__ as title,
+        arn,
+        region,
+        tags,
+        jsonb_object_keys(tags) as key,
+        _ctx ->> 'connection_name' as cred
+      from
+        __TABLE_NAME__
+    ),
+    filtered_tags as (
+      select
+        title,
+        arn,
+        region,
+        key,
+        tags -> key as value,
+        cred
+      from tag_details
+      where
+        key <> __FUNCTION__(key)
+        and key not like 'aws:%' -- Exclude AWS-managed tag keys
+    )
+    select
+      title,
+      arn,
+      region,
+      cred,
+      jsonb_object_agg(key, value) as invalid_tags
+    from filtered_tags
+    group by title, arn, region, cred
+    having count(key) > 0;
   EOQ
 }

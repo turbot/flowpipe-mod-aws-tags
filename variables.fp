@@ -28,6 +28,12 @@ variable "max_concurrency" {
   default     = 1
 }
 
+variable "tag_key_case" {
+  type        = string
+  description = "The case to use for tag keys. Valid options are 'lower', 'upper'." // TODO: Should we support other cases?
+  default     = "lower"
+}
+
 variable "global_prohibited_tag_keys" {
   type        = list(string)
   description = "" // TODO: Add description
