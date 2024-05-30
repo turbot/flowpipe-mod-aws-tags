@@ -10,7 +10,8 @@ locals {
       "concat('S3 Bucket ', r.name, ' [', r.region, '/', r.account_id, ']')"
     ),
     "__VALUE_MAPPINGS__", 
-    join(" union all ", [for key, values in var.value_misspellings : "select '${key}' as tag_key, jsonb_build_array(${join(", ", [for v in values.incorrect : "'${v}'"])}) as old_values, '${values.correction}' as new_value"])
+    // join(" union all ", [for key, values in var.value_misspellings : "select '${key}' as tag_key, jsonb_build_array(${join(", ", [for v in values.incorrect : "'${v}'"])}) as old_values, '${values.correction}' as new_value"])
+    join(" union all ", [for key, corrections in var.value_misspellings : [for correction in corrections : "select '${key}' as tag_key, jsonb_build_array(${join(", ", [for v in correction.incorrect : "'${v}'"])}) as old_values, '${correction.correction}' as new_value"]]...)
   )
 }
 
@@ -78,6 +79,10 @@ pipeline "detect_and_correct_s3_buckets_with_misspelled_tag_values" {
   step "query" "detect" {
     database = param.database
     sql      = local.s3_buckets_with_misspelled_tag_values_query
+
+    output "debug" {
+      value = local.s3_buckets_with_misspelled_tag_values_query
+    }
   }
 
   step "pipeline" "respond" {

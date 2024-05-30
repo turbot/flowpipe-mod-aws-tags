@@ -53,19 +53,22 @@ variable "global_mandatory_tags" {
 }
 
 variable "value_misspellings" {
-  type = map(object({
+  type = map(list(object({
     incorrect  = list(string)
     correction = string
-  }))
+  })))
   description = "" // TODO: Add description
   default = { // TODO: Get a better list of default values OR provide no defaults
-    "environment" = {
+    "environment" = [{
       incorrect  = ["Development", "Dev", "development"]
       correction = "dev"
-    }
-    "HELLO" = {
+    }, {
+      incorrect  = ["Production", "Prod", "production"]
+      correction = "prod"
+    }]
+    "HELLO" = [{
       incorrect  = ["World", "WORLD", "w0rld", "W0RLD", "W0rld"]
       correction = "world"
-    }
+    }]
   }
 }
