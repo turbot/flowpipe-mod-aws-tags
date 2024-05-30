@@ -1,4 +1,7 @@
 pipeline "add_and_remove_tags" {
+  title       = "Add and Remove Tags"
+  description = "Add and remove tags from a resource"
+  
   param "arn" {
     type        = string
     description = local.description_arn
