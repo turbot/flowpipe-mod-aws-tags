@@ -1,42 +1,42 @@
 locals {
-  s3_buckets_without_standardized_tag_keys_query = replace(
+  s3_buckets_with_misspelled_tag_values_query = replace(
     replace(
       replace(
-        local.non_standardized_tags_query, 
+        local.misspelled_tag_values_query, 
         "__TABLE_NAME__", 
         "aws_s3_bucket"
       ),
       "__TITLE__", 
       "concat('S3 Bucket ', r.name, ' [', r.region, '/', r.account_id, ']')"
     ),
-    "__TAG_MAPPINGS__", 
-    join(" union all ", [for key, values in var.s3_buckets_without_standardized_tag_keys_standardizations : "select '${key}' as new_key, jsonb_build_array(${join(", ", [for v in values : "'${v}'"])}) as old_keys"])
+    "__VALUE_MAPPINGS__", 
+    join(" union all ", [for key, values in var.value_misspellings : "select '${key}' as tag_key, jsonb_build_array(${join(", ", [for v in values.incorrect : "'${v}'"])}) as old_values, '${values.correction}' as new_value"])
   )
 }
 
-trigger "query" "detect_and_correct_s3_buckets_without_standardized_tag_keys" {
-  title         = "Detect & correct S3 buckets without standardized tag keys"
-  description   = "Detects S3 buckets without standardized tag keys and runs your chosen action."
-  // documentation = file("./pipelines/s3/docs/detect_and_correct_s3_buckets_without_standardized_tag_keys_trigger.md")
+trigger "query" "detect_and_correct_s3_buckets_with_misspelled_tag_values" {
+  title         = "Detect & correct S3 buckets with misspelled tag values"
+  description   = "Detects S3 buckets with misspelled tag values and runs your chosen action."
+  // documentation = file("./pipelines/s3/docs/detect_and_correct_s3_buckets_with_misspelled_tag_values_trigger.md")
   // tags          = merge(local.s3_common_tags, { class = "" })
 
-  enabled  = var.s3_buckets_without_standardized_tag_keys_trigger_enabled
-  schedule = var.s3_buckets_without_standardized_tag_keys_trigger_schedule
+  enabled  = var.s3_buckets_with_misspelled_tag_values_trigger_enabled
+  schedule = var.s3_buckets_with_misspelled_tag_values_trigger_schedule
   database = var.database
-  sql      = local.s3_buckets_without_standardized_tag_keys_query
+  sql      = local.s3_buckets_with_misspelled_tag_values_query
 
   capture "insert" {
-    pipeline = pipeline.correct_s3_buckets_without_standardized_tag_keys
+    pipeline = pipeline.correct_s3_buckets_with_misspelled_tag_values
     args = {
       items = self.inserted_rows
     }
   }
 }
 
-pipeline "detect_and_correct_s3_buckets_without_standardized_tag_keys" {
-  title         = "Detect & correct S3 buckets without standardized tag keys"
-  description   = "Detects S3 buckets without standardized tag keys and runs your chosen action."
-  // documentation = file("./pipelines/s3/docs/detect_and_correct_s3_buckets_without_standardized_tag_keys.md")
+pipeline "detect_and_correct_s3_buckets_with_misspelled_tag_values" {
+  title         = "Detect & correct S3 buckets with misspelled tag values"
+  description   = "Detects S3 buckets with misspelled tag values and runs your chosen action."
+  // documentation = file("./pipelines/s3/docs/detect_and_correct_s3_buckets_with_misspelled_tag_values.md")
   // tags          = merge(local.s3_common_tags, { class = "", type = "featured" })
 
   param "database" {
@@ -66,22 +66,22 @@ pipeline "detect_and_correct_s3_buckets_without_standardized_tag_keys" {
   param "default_action" {
     type        = string
     description = local.description_default_action
-    default     = var.s3_buckets_without_standardized_tag_keys_default_action
+    default     = var.s3_buckets_with_misspelled_tag_values_default_action
   }
 
   param "enabled_actions" {
     type        = list(string)
     description = local.description_enabled_actions
-    default     = var.s3_buckets_without_standardized_tag_keys_enabled_actions
+    default     = var.s3_buckets_with_misspelled_tag_values_enabled_actions
   }
 
   step "query" "detect" {
     database = param.database
-    sql      = local.s3_buckets_without_standardized_tag_keys_query
+    sql      = local.s3_buckets_with_misspelled_tag_values_query
   }
 
   step "pipeline" "respond" {
-    pipeline = pipeline.correct_s3_buckets_without_standardized_tag_keys
+    pipeline = pipeline.correct_s3_buckets_with_misspelled_tag_values
     args = {
       items              = step.query.detect.rows
       notifier           = param.notifier
@@ -93,20 +93,20 @@ pipeline "detect_and_correct_s3_buckets_without_standardized_tag_keys" {
   }
 }
 
-pipeline "correct_s3_buckets_without_standardized_tag_keys" {
-  title         = "Correct S3 buckets without standardized tag keys"
-  description   = "Runs corrective action on a collection of S3 buckets which do not have standardized tag keys."
-  // documentation = file("./pipelines/s3/docs/correct_s3_buckets_with_incorrect_tag_key_casing.md")
+pipeline "correct_s3_buckets_with_misspelled_tag_values" {
+  title         = "Correct S3 buckets with misspelled tag values"
+  description   = "Runs corrective action on a collection of S3 buckets which have misspellings or typos in the tag values."
+  // documentation = file("./pipelines/s3/docs/correct_s3_buckets_with_misspelled_tag_values.md")
   // tags          = merge(local.s3_common_tags, { class = "" })
 
   param "items" {
     type = list(object({
-      title            = string
-      arn              = string
-      region           = string
-      cred             = string
-      invalid_tag_keys = list(string)
-      replacement_tags = map(string)
+      title          = string
+      arn            = string
+      region         = string
+      cred           = string
+      incorrect_tags = map(string)
+      corrected_tags = map(string)
     }))
   }
 
@@ -131,19 +131,19 @@ pipeline "correct_s3_buckets_without_standardized_tag_keys" {
   param "default_action" {
     type        = string
     description = local.description_default_action
-    default     = var.s3_buckets_without_standardized_tag_keys_default_action
+    default     = var.s3_buckets_with_misspelled_tag_values_default_action
   }
 
   param "enabled_actions" {
     type        = list(string)
     description = local.description_enabled_actions
-    default     = var.s3_buckets_without_standardized_tag_keys_enabled_actions
+    default     = var.s3_buckets_with_misspelled_tag_values_enabled_actions
   }
 
   step "message" "notify_detection_count" {
     if       = var.notification_level == local.level_verbose
     notifier = notifier[param.notifier]
-    text     = "Detected ${length(param.items)} S3 Buckets without standardized tag keys."
+    text     = "Detected ${length(param.items)} S3 Buckets with misspelled tag values."
   }
 
   step "transform" "items_by_id" {
@@ -153,14 +153,14 @@ pipeline "correct_s3_buckets_without_standardized_tag_keys" {
   step "pipeline" "correct_item" {
     for_each        = step.transform.items_by_id.value
     max_concurrency = var.max_concurrency
-    pipeline        = pipeline.correct_one_s3_bucket_without_standardized_tag_keys
+    pipeline        = pipeline.correct_one_s3_bucket_with_misspelled_tag_values
     args            = {
       title              = each.value.title
       arn                = each.value.arn
       region             = each.value.region
       cred               = each.value.cred
-      invalid_tag_keys   = each.value.invalid_tag_keys
-      replacement_tags   = each.value.replacement_tags
+      incorrect_tags     = each.value.incorrect_tags
+      corrected_tags     = each.value.corrected_tags
       notifier           = param.notifier
       notification_level = param.notification_level
       approvers          = param.approvers
@@ -170,10 +170,10 @@ pipeline "correct_s3_buckets_without_standardized_tag_keys" {
   }
 }
 
-pipeline "correct_one_s3_bucket_without_standardized_tag_keys" {
-  title         = "Correct one S3 bucket without standardized tag keys"
-  description   = "Runs corrective action on a single S3 bucket which does not have standardized tag keys."
-  // documentation = file("./pipelines/s3/docs/correct_one_s3_bucket_without_standardized_tag_keys.md")
+pipeline "correct_one_s3_bucket_with_misspelled_tag_values" {
+  title         = "Correct one S3 bucket with misspelled tag values"
+  description   = "Runs corrective action on a single S3 bucket which has misspellings or typos in the tag values."
+  // documentation = file("./pipelines/s3/docs/correct_one_s3_bucket_with_misspelled_tag_values.md")
   // tags          = merge(local.s3_common_tags, { class = "" })
 
   param "title" {
@@ -196,12 +196,12 @@ pipeline "correct_one_s3_bucket_without_standardized_tag_keys" {
     description = local.description_credential
   }
 
-  param "invalid_tag_keys" {
-    type        = list(string)
+  param "incorrect_tags" {
+    type        = map(string)
     description = "" // TODO: Add description
   }
 
-  param "replacement_tags" {
+  param "corrected_tags" {
     type        = map(string)
     description = "" // TODO: Add description
   }
@@ -227,13 +227,13 @@ pipeline "correct_one_s3_bucket_without_standardized_tag_keys" {
   param "default_action" {
     type        = string
     description = local.description_default_action
-    default     = var.s3_buckets_without_standardized_tag_keys_default_action
+    default     = var.s3_buckets_with_misspelled_tag_values_default_action
   }
 
   param "enabled_actions" {
     type        = list(string)
     description = local.description_enabled_actions
-    default     = var.s3_buckets_without_standardized_tag_keys_enabled_actions
+    default     = var.s3_buckets_with_misspelled_tag_values_enabled_actions
   }
 
   step "pipeline" "respond" {
@@ -242,7 +242,7 @@ pipeline "correct_one_s3_bucket_without_standardized_tag_keys" {
       notifier           = param.notifier
       notification_level = param.notification_level
       approvers          = param.approvers
-      detect_msg         = "Detected ${param.title} with non-standardized tag keys: (${join(", ", param.invalid_tag_keys)})."
+      detect_msg         = "Detected ${param.title} with misspelled tag values."
       default_action     = param.default_action
       enabled_actions    = param.enabled_actions
       actions = {
@@ -254,61 +254,50 @@ pipeline "correct_one_s3_bucket_without_standardized_tag_keys" {
           pipeline_args = {
             notifier = param.notifier
             send     = param.notification_level == local.level_verbose
-            text     = "Skipped ${param.title} with non-standardized tag keys: (${join(", ", param.invalid_tag_keys)})."
+            text     = "Skipped ${param.title} with misspelled tag values."
           }
           success_msg = ""
           error_msg   = ""
         }
-       "update_tag_keys" = {
-          label        = "Update Tag Keys"
-          value        = "update_tag_keys"
+       "update_tag_values" = {
+          label        = "Update Tag Values"
+          value        = "update_tag_values"
           style        = local.style_ok
-          pipeline_ref = pipeline.add_and_remove_tags
+          pipeline_ref = local.aws_pipeline_tag_resources
           pipeline_args = {
-            cred            = param.cred 
-            region          = param.region
-            arn             = param.arn
-            add_tags        = param.replacement_tags
-            remove_tag_keys = param.invalid_tag_keys
+            cred          = param.cred 
+            region        = param.region
+            resource_arns = [param.arn]
+            tags          = param.corrected_tags
           }
-          success_msg = "Applied updated tags to ${param.title}."
-          error_msg   = "Error applying updated tags to ${param.title}"
+          success_msg = "Applied updated tag values to ${param.title}."
+          error_msg   = "Error applying updated tag values to ${param.title}"
         }
       }
     }
   }
 }
 
-variable "s3_buckets_without_standardized_tag_keys_standardizations" {
-  type = map(list(string))
-  description = "" // TODO: Add description
-  default = {
-    "turbot" = ["trbt", "turbit"] // TODO: Implement a better default
-    "owner"  = ["ownr", "Owner"]
-    "costcenter" = ["cost_center", "CostCenter", "cc", "costcentre"]
-  }
-}
-
-variable "s3_buckets_without_standardized_tag_keys_trigger_enabled" {
+variable "s3_buckets_with_misspelled_tag_values_trigger_enabled" {
   type        = bool
   default     = false
   description = "If true, the trigger is enabled."
 }
 
-variable "s3_buckets_without_standardized_tag_keys_trigger_schedule" {
+variable "s3_buckets_with_misspelled_tag_values_trigger_schedule" {
   type        = string
   default     = "15m"
   description = "The schedule on which to run the trigger if enabled."
 }
 
-variable "s3_buckets_without_standardized_tag_keys_default_action" {
+variable "s3_buckets_with_misspelled_tag_values_default_action" {
   type        = string
   description = "The default action to use for the detected item, used if no input is provided."
   default     = "notify"
 }
 
-variable "s3_buckets_without_standardized_tag_keys_enabled_actions" {
+variable "s3_buckets_with_misspelled_tag_values_enabled_actions" {
   type        = list(string)
   description = "The list of enabled actions to provide to approvers for selection."
-  default     = ["skip", "update_tag_keys"]
+  default     = ["skip", "update_tag_values"]
 }

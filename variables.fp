@@ -37,7 +37,7 @@ variable "tag_key_case" {
 variable "global_prohibited_tag_keys" {
   type        = list(string)
   description = "" // TODO: Add description
-  default     = ["password", "secret", "key"]
+  default     = ["password", "secret", "key"] // TODO: Get a better list of default values OR provide no defaults
 }
 
 // TODO: Come up with a better way of getting default values for our mandatory tags (should these somehow be dynamic?)
@@ -49,5 +49,23 @@ variable "global_mandatory_tags" {
     owner       = "not set"
     cost_center = "not set"
     name        = "not set"
+  }
+}
+
+variable "value_misspellings" {
+  type = map(object({
+    incorrect  = list(string)
+    correction = string
+  }))
+  description = "" // TODO: Add description
+  default = { // TODO: Get a better list of default values OR provide no defaults
+    "environment" = {
+      incorrect  = ["Development", "Dev", "development"]
+      correction = "dev"
+    }
+    "HELLO" = {
+      incorrect  = ["World", "WORLD", "w0rld", "W0RLD", "W0rld"]
+      correction = "world"
+    }
   }
 }

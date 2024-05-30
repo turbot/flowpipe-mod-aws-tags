@@ -113,12 +113,12 @@ locals {
   EOQ
 
   non_standardized_tags_query = <<-EOQ
-    WITH tag_mappings AS (
+    with tag_mappings as (
       __TAG_MAPPINGS__
     ),
-    expanded_tags AS (
-      SELECT
-        __TITLE__ AS title,
+    expanded_tags as (
+      select
+        __TITLE__ AasS title,
         r.region,
         r.arn,
         r._ctx ->> 'connection_name' AS cred,
@@ -126,27 +126,60 @@ locals {
         tk.key,
         tk.value,
         tm.new_key
-      FROM
+      from
         __TABLE_NAME__ r,
         jsonb_each_text(r.tags) AS tk(key, value)
-      LEFT JOIN
-        tag_mappings tm ON tk.key = ANY(SELECT jsonb_array_elements_text(tm.old_keys))
+      left join
+        tag_mappings tm on tk.key = any(select jsonb_array_elements_text(tm.old_keys))
     )
-    SELECT
+    select
       e.title,
       e.region,
       e.arn,
       e.cred,
-      jsonb_agg(e.key) AS invalid_tag_keys,
-      jsonb_object_agg(
-        COALESCE(e.new_key, e.key),
-        e.value
-      ) AS replacement_tags
-    FROM
+      jsonb_agg(e.key) as invalid_tag_keys,
+      jsonb_object_agg(coalesce(e.new_key, e.key), e.value) as replacement_tags
+    from
       expanded_tags e
-    WHERE
-      e.new_key IS NOT NULL
-    GROUP BY
+    where
+      e.new_key is not null
+    group by
+      e.title, e.region, e.arn, e.cred;
+  EOQ
+
+  misspelled_tag_values_query = <<-EOQ
+    with value_mappings as (
+      __VALUE_MAPPINGS__
+    ),
+    expanded_tags as (
+      select
+        __TITLE__ as title,
+        r.region,
+        r.arn,
+        r._ctx ->> 'connection_name' as cred,
+        r.tags,
+        tk.key,
+        tk.value,
+        vm.tag_key,
+        vm.new_value
+      from
+        __TABLE_NAME__ r,
+        jsonb_each_text(r.tags) as tk(key, value)
+      left join
+        value_mappings vm on tk.value = any(select jsonb_array_elements_text(vm.old_values)) and tk.key = vm.tag_key
+    )
+    select
+      e.title,
+      e.region,
+      e.arn,
+      e.cred,
+      jsonb_object_agg(e.key, e.value) as incorrect_tags,
+      jsonb_object_agg(e.key, e.new_value) as corrected_tags
+    from
+      expanded_tags e
+    where
+      e.new_value is not null
+    group by
       e.title, e.region, e.arn, e.cred;
   EOQ
 }
