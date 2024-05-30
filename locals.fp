@@ -118,7 +118,7 @@ locals {
     ),
     expanded_tags as (
       select
-        __TITLE__ AasS title,
+        __TITLE__ as title,
         r.region,
         r.arn,
         r._ctx ->> 'connection_name' AS cred,
@@ -230,6 +230,6 @@ locals {
     where
       ft.corrected_value <> ft.value
     group by
-      ft.name, ft.region, ft.arn, ft.cred;
+      ft.title, ft.region, ft.arn, ft.cred;
   EOQ
 }
