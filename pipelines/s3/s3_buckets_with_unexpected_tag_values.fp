@@ -1,5 +1,5 @@
-locals = {
-  s3_buckets_with_unexpected_tag_values_query = s3_buckets_with_unexpected_tag_values_query = replace(
+locals {
+  s3_buckets_with_unexpected_tag_values_query = replace(
     replace(
       replace(
         local.unexpected_tag_values_query, 
