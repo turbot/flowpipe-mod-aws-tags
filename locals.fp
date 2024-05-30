@@ -182,4 +182,54 @@ locals {
     group by
       e.title, e.region, e.arn, e.cred;
   EOQ
+
+  unexpected_tag_values_query = <<-EOQ
+    with value_mappings as (
+      select 'environment' as tag_key, array['dev%', 'test', 'qa', 'p_od%'] as expected_values, 'development' as default_value
+      union all select 'hello' as tag_key, array['b%', 'completed', 'running'] as expected_values, 'bob' as default_value
+    ),
+    expanded_tags as (
+      select
+        __TITLE__ as title,
+        r.region,
+        r.arn,
+        r._ctx->>'connection_name' as cred,
+        tk.key,
+        tk.value,
+        vm.tag_key,
+        vm.expected_values,
+        vm.default_value
+      from
+        __TABLE_NAME__ r,
+        jsonb_each_text(r.tags) as tk(key, value)
+      join
+        value_mappings vm on tk.key = vm.tag_key
+    ),
+    filtered_tags as (
+      select
+        e.title,
+        e.region,
+        e.arn,
+        e.cred,
+        e.key,
+        e.value,
+        e.default_value,
+        (case when not exists (select 1 from unnest(e.expected_values) as ev where e.value like ev) then e.default_value else e.value end) as corrected_value
+      from
+        expanded_tags e
+    )
+    select
+      ft.title,
+      ft.region,
+      ft.arn,
+      ft.cred,
+      jsonb_object_agg(ft.key, ft.value) as invalid_values,
+      jsonb_object_agg(ft.key, ft.corrected_value) as corrected_tags
+    from
+      filtered_tags ft
+    where
+      ft.corrected_value <> ft.value
+    group by
+      ft.name, ft.region, ft.arn, ft.cred;
+  EOQ
 }

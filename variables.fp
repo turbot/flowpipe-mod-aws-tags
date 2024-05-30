@@ -72,3 +72,21 @@ variable "value_misspellings" {
     }]
   }
 }
+
+variable "expected_tag_values" {
+  type = map(object({
+    value_patterns = list(string)
+    default_value  = string
+  }))
+  description = "" // TODO: Add description
+  default = {
+    "environment" = {
+      value_patterns = ["dev%", "test", "qa", "prod%"]
+      default_value  = "dev"
+    }
+    "status" = {
+      value_patterns = ["stat%", "completed", "running"]
+      default_value  = "unknown"
+    }
+  }
+}
