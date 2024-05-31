@@ -121,14 +121,14 @@ locals {
         __TITLE__ as title,
         r.region,
         r.arn,
-        r._ctx ->> 'connection_name' AS cred,
+        r._ctx ->> 'connection_name' as cred,
         r.tags,
         tk.key,
         tk.value,
         tm.new_key
       from
         __TABLE_NAME__ r,
-        jsonb_each_text(r.tags) AS tk(key, value)
+        jsonb_each_text(r.tags) as tk(key, value)
       left join
         tag_mappings tm on tk.key = any(select jsonb_array_elements_text(tm.old_keys))
     )
@@ -214,7 +214,7 @@ locals {
         e.key,
         e.value,
         e.default_value,
-        (case when not exists (select 1 from unnest(e.expected_values) as ev where e.value like ev) then e.default_value else e.value end) as corrected_value
+        (case when not exists (select 1 from unnest(e.expected_values) as ev where e.value like ev or e.value ~ ev) then e.default_value else e.value end) as corrected_value
       from
         expanded_tags e
     )
