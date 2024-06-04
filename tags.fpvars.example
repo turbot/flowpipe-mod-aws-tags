@@ -4,13 +4,3 @@ notifier           = "default"
 notification_level = "info"
 approvers          = []
 max_concurrency    = 1
-
-# Global
-global_prohibited_tag_keys = ["password", "secret", "key"]
-
-# S3 buckets with prohibited tags
-s3_buckets_with_prohibited_tags_keys             = []
-s3_buckets_with_prohibited_tags_trigger_enabled  = false
-s3_buckets_with_prohibited_tags_trigger_schedule = "15m"
-s3_buckets_with_prohibited_tags_default_action   = "notify"
-s3_buckets_with_prohibited_tags_enabled_actions  = ["skip", "delete_prohibited_tags"]

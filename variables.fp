@@ -27,9 +27,3 @@ variable "max_concurrency" {
   description = "The maximum concurrency to use for responding to detection items."
   default     = 1
 }
-
-variable "global_prohibited_tag_keys" {
-  type        = list(string)
-  description = ""
-  default     = ["password", "secret", "key"]
-}

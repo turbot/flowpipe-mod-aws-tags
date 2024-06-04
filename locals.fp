@@ -1,6 +1,6 @@
 locals {
   aws_tags_common_tags = {
-    category = "Tags"
+    category = "tags"
     plugin   = "aws"
     service  = "AWS"
   }
@@ -43,21 +43,4 @@ locals {
   pipeline_optional_message    = detect_correct.pipeline.optional_message
   aws_pipeline_tag_resources   = aws.pipeline.tag_resources
   aws_pipeline_untag_resources = aws.pipeline.untag_resources
-}
-
-locals {
-  prohibited_tags_query = <<-EOQ
-    select
-      __TITLE__ as title,
-      arn,
-      region,
-      _ctx ->> 'connection_name' as cred,
-      json_agg(keys) as prohibited_tags
-    from
-      __TABLE_NAME__,
-      jsonb_object_keys(tags) as keys
-    where
-      lower(keys) = any (array[__PROHIBITED_TAGS__])
-    group by arn, region, cred, __ADDITIONAL_GROUP_BY__
-  EOQ
 }
