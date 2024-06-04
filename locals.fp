@@ -185,8 +185,7 @@ locals {
 
   unexpected_tag_values_query = <<-EOQ
     with value_mappings as (
-      select 'environment' as tag_key, array['dev%', 'test', 'qa', 'p_od%'] as expected_values, 'development' as default_value
-      union all select 'hello' as tag_key, array['b%', 'completed', 'running'] as expected_values, 'bob' as default_value
+      __VALUE_MAPPINGS__
     ),
     expanded_tags as (
       select
