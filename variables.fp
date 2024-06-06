@@ -27,3 +27,33 @@ variable "max_concurrency" {
   description = "The maximum concurrency to use for responding to detection items."
   default     = 1
 }
+
+variable "default_action" {
+  type        = string
+  description = "The default action to take when no approvers are specified."
+  default     = "notify"
+}
+
+variable "enabled_actions" {
+  type        = list(string)
+  description = "List of enabled actions to take when a detection is triggered."
+  default     = ["skip", "apply"]
+
+}
+
+// variable "general_key_rules" {
+//   type = object({
+//     require = map(string) // key with default value
+//     allow   = list(string) // pattern matched keys - if set, all other keys to be removed
+//     remove  = list(string) // keys to be removed (prohibited keys)
+//     update  = map(list(string)) // list is pattern matched keys, key is new key.
+//   })
+// }
+
+// variable "general_value_rules" {
+//   type = map(object({
+//     allow  = list(string)
+//     remove = list(string)
+//     update = map(list(string))
+//   }))
+// }
