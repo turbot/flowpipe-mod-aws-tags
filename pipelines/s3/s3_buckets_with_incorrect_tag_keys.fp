@@ -89,16 +89,6 @@ pipeline "detect_and_correct_s3_buckets_with_incorrect_tag_keys" {
     }
   }
 
-  // TODO: Remove this message step
-  // step "message" "count" {
-  //   notifier = notifier[param.notifier]
-  //   text = format("Found %d S3 buckets with incorrect tag keys.", length(step.query.detect.rows))
-
-  //   output "debug" {
-  //     value = step.query.detect.rows
-  //   }
-  // }
-
   step "pipeline" "correct" {
     pipeline = pipeline.correct_resources_with_incorrect_tag_keys
     args = {
