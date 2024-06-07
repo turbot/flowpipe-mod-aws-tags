@@ -78,10 +78,6 @@ pipeline "detect_and_correct_iam_roles_with_incorrect_tag_keys" {
   step "query" "detect" {
     database = param.database
     sql      = local.iam_roles_with_incorrect_tag_keys_query
-
-    output "debug" {
-      value = local.iam_roles_with_incorrect_tag_keys_query
-    }
   }
 
   step "pipeline" "correct" {

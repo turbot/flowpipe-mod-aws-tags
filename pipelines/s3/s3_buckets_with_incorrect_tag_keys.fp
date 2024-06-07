@@ -83,10 +83,6 @@ pipeline "detect_and_correct_s3_buckets_with_incorrect_tag_keys" {
   step "query" "detect" {
     database = param.database
     sql      = local.s3_buckets_with_incorrect_tag_keys_query
-
-    output "debug" {
-      value = local.s3_buckets_with_incorrect_tag_keys_query
-    }
   }
 
   step "pipeline" "correct" {
@@ -123,25 +119,3 @@ variable "s3_buckets_with_incorrect_tag_keys_trigger_schedule" {
   default     = "15m"
   description = "The schedule on which to run the trigger if enabled."
 }
-
-// pipeline "test" {
-//   step "transform" "debug" {
-//     value = "debug"
-
-//     output "update_override" {
-//       value = join("\n",flatten([for key, patterns in var.s3_buckets_with_incorrect_tag_keys_rules.update : [for pattern in patterns : format("      when key %s '%s' then '%s'", (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? element(split(":", pattern), 0) : "="), (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? join(":", slice(split(":", pattern), 1, length(split(":", pattern)))) : pattern), key)]]))
-//     }
-
-//     output "remove_override" {
-//       value = join("\n", length(var.s3_buckets_with_incorrect_tag_keys_rules.remove) == 0 ? ["      when new_key like '%' then false"] : [for pattern in var.s3_buckets_with_incorrect_tag_keys_rules.remove : format("      when new_key %s '%s' then true", (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? element(split(":", pattern), 0) : "="), (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? join(":", slice(split(":", pattern), 1, length(split(":", pattern)))) : pattern))])
-//     }
-
-//     output "allow_override" {
-//       value = join("\n", length(var.s3_buckets_with_incorrect_tag_keys_rules.allow) == 0 ? ["      when new_key like '%' then true"] : [for pattern in var.s3_buckets_with_incorrect_tag_keys_rules.allow : format("      when new_key %s '%s' then true", (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? element(split(":", pattern), 0) : "="), (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? join(":", slice(split(":", pattern), 1, length(split(":", pattern)))) : pattern))])
-//     }
-
-//     output "require_override" {
-//       value = join(",\n", length(keys(var.s3_buckets_with_incorrect_tag_keys_rules.require)) == 0 ? ["      (null, null)"] : [for key, value in var.s3_buckets_with_incorrect_tag_keys_rules.require : format("      ('%s', '%s')", key, value)])
-//     }
-//   }
-// }
