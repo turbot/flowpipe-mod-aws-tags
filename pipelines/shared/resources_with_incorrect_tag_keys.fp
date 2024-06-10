@@ -143,17 +143,12 @@ pipeline "correct_one_resource_with_incorrect_tag_keys" {
     default     = var.enabled_actions
   }
 
-  // step "message" "debug" {
-  //   notifier = notifier[param.notifier]
-  //   text = "Correcting ${param.title} with incorrect tag keys.\nRemove: ${join(", ", param.remove)}\nAdd: ${jsonencode(param.add)}"
-  // }
-
   step "transform" "remove_keys_display" {
-    value = join("\n", [for key in param.remove : format("- %s", key)])
+    value = length(param.remove) > 0 ? format(" Tag keys that will be removed: %s.", join(", ", param.remove)) : ""
   }
 
   step "transform" "add_keys_display" {
-    value = join("\n", [for key, value in param.add : format("- %s: %s", key, value)])
+    value = length(param.add) > 0 ? format(" Tags that will be added: %s.", join(", ", [for key, value in param.add : format("%s=%s", key, value)])) : ""
   }
 
   step "transform" "name_display" {
@@ -166,7 +161,7 @@ pipeline "correct_one_resource_with_incorrect_tag_keys" {
       notifier           = param.notifier
       notification_level = param.notification_level
       approvers          = param.approvers
-      detect_msg         = format("Detected %s with incorrect tag keys, below are a list of remediations to apply.\nAdd or Update:\n%s\nRemove:\n%s", step.transform.name_display.value, step.transform.add_keys_display.value, step.transform.remove_keys_display.value)
+      detect_msg         = format("Detected %s with incorrect tag keys, below are a list of remediations to apply.%s%s", step.transform.name_display.value, step.transform.add_keys_display.value, step.transform.remove_keys_display.value)
       default_action     = param.default_action
       enabled_actions    = param.enabled_actions
       actions = {
