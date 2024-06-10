@@ -2,7 +2,6 @@ pipeline "correct_resources_with_incorrect_tag_keys" {
   title         = "" // TODO: Add title
   description   = "" // TODO: Add description
   documentation = "" // TODO: Add documentation
-  tags          = merge(local.s3_common_tags, { type = "featured" })
 
   param "items" {
     type = list(object({
@@ -76,7 +75,6 @@ pipeline "correct_one_resource_with_incorrect_tag_keys" {
   title         = "" // TODO: Add title
   description   = "" // TODO: Add description
   documentation = "" // TODO: Add documentation
-  tags          = merge(local.s3_common_tags, { type = "featured" })
 
   param "title" {
     type        = string
