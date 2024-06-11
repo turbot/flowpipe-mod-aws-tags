@@ -145,4 +145,71 @@ select * from (
 ) result
 where remove != '[]'::jsonb or add != '{}'::jsonb;
   EOQ
+
+  tag_values_query = <<-EOQ
+with tags as (
+  select
+    __TITLE__ as title,
+    arn,
+    region,
+    account_id,
+    sp_connection_name as cred,
+    key,
+    value
+  from
+    __TABLE_NAME__,
+    jsonb_each_text(tags) as t(key, value)
+),update_values as (
+  select
+    arn,
+    key,
+    case
+      when false then ''
+__UPDATE_OVERRIDES__
+      else value
+    end as updated_value
+  from
+    tags
+),remove_values as (
+  select
+    arn,
+    key,
+    case
+      when false then ''
+__REMOVE_OVERRIDES__
+      else updated_value
+    end as updated_value
+    from
+      update_values
+),allow_values as (
+  select
+    arn,
+    key,
+    case
+      when false then ''
+__ALLOW_OVERRIDES__
+      else updated_value
+    end as final_value
+  from
+    remove_values
+),final as (
+  select
+    t.title,
+    t.arn,
+    t.region,
+    t.account_id,
+    t.cred,
+    jsonb_object_agg(t.key, t.value) filter (where t.value != a.final_value)       as original,
+    jsonb_object_agg(a.key, a.final_value) filter (where t.value != a.final_value) as updated
+  from tags t
+  join allow_values a on t.arn = a.arn and t.key = a.key
+  group by
+    t.title,
+    t.arn,
+    t.region,
+    t.account_id,
+    t.cred
+)
+select * from final where original is not null or updated is not null;
+  EOQ
 }
