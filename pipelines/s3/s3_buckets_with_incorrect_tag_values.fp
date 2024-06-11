@@ -21,11 +21,81 @@ locals {
   )
 }
 
-pipeline "test" {
-  step "transform" "debug" {
-    value = "irrelevant"
-    output "debug" {
-      value = local.s3_buckets_with_incorrect_tag_values_query
+trigger "query" "detect_and_correct_s3_buckets_with_incorrect_tag_values" {
+  title         = "Detect & correct S3 buckets with incorrect tag values"
+  description   = "" // TODO: Add description
+  documentation = "" // TODO: Add documentation
+  tags          = merge(local.s3_common_tags, { })
+
+  enabled       = var.s3_buckets_with_incorrect_tag_values_trigger_enabled
+  schedule      = var.s3_buckets_with_incorrect_tag_values_trigger_schedule
+  database      = var.database
+  sql           = local.s3_buckets_with_incorrect_tag_values_query
+
+  capture "insert" {
+    pipeline = pipeline.correct_resources_with_incorrect_tag_values
+    args = {
+      items = self.inserted_rows
+    }
+  }
+}
+
+pipeline "detect_and_correct_s3_buckets_with_incorrect_tag_values" {
+  title         = "Detect & correct S3 buckets with incorrect tag values"
+  description   = "" // TODO: Add description
+  documentation = "" // TODO: Add documentation
+  tags          = merge(local.s3_common_tags, { type = "featured" })
+
+  param "database" {
+    type        = string
+    description = local.description_database
+    default     = var.database
+  }
+
+  param "notifier" {
+    type        = string
+    description = local.description_notifier
+    default     = var.notifier
+  }
+
+  param "notification_level" {
+    type        = string
+    description = local.description_notifier_level
+    default     = var.notification_level
+  }
+
+  param "approvers" {
+    type        = list(string)
+    description = local.description_approvers
+    default     = var.approvers
+  }
+
+  param "default_action" {
+    type        = string
+    description = local.description_default_action
+    default     = var.incorrect_tag_values_default_action
+  }
+
+  param "enabled_actions" {
+    type        = list(string)
+    description = local.description_enabled_actions
+    default     = var.incorrect_tag_values_enabled_actions
+  }
+
+  step "query" "detect" {
+    database = param.database
+    sql      = local.s3_buckets_with_incorrect_tag_values_query
+  }
+
+  step "pipeline" "correct" {
+    pipeline = pipeline.correct_resources_with_incorrect_tag_values
+    args = {
+      items              = step.query.detect.rows
+      notifier           = param.notifier
+      notification_level = param.notification_level
+      approvers          = param.approvers
+      default_action     = param.default_action
+      enabled_actions    = param.enabled_actions
     }
   }
 }

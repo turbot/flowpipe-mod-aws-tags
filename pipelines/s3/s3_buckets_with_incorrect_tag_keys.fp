@@ -20,7 +20,7 @@ locals {
 }
 
 trigger "query" "detect_and_correct_s3_buckets_with_incorrect_tag_keys" {
-  title         = "" // TODO: Add title
+  title         = "Detect & correct S3 buckets with incorrect tag keys"
   description   = "" // TODO: Add description
   documentation = "" // TODO: Add documentation
   tags          = merge(local.s3_common_tags, { })
@@ -39,7 +39,7 @@ trigger "query" "detect_and_correct_s3_buckets_with_incorrect_tag_keys" {
 }
 
 pipeline "detect_and_correct_s3_buckets_with_incorrect_tag_keys" {
-  title         = "" // TODO: Add title
+  title         = "Detect & correct S3 buckets with incorrect tag keys"
   description   = "" // TODO: Add description
   documentation = "" // TODO: Add documentation
   tags          = merge(local.s3_common_tags, { type = "featured" })
