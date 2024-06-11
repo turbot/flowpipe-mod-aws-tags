@@ -46,12 +46,8 @@ pipeline "correct_resources_with_incorrect_tag_keys" {
     default     = var.incorrect_tag_keys_enabled_actions
   }
 
-  step "transform" "items_by_id" {
-    value = { for row in param.items : row.arn => row }
-  }
-
   step "pipeline" "correct_one" {
-    for_each        = step.transform.items_by_id.value
+    for_each        = { for row in param.items : row.arn => row }
     max_concurrency = var.max_concurrency
     pipeline        = pipeline.correct_one_resource_with_incorrect_tag_keys
     args = {
