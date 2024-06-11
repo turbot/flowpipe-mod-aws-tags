@@ -66,13 +66,13 @@ pipeline "detect_and_correct_iam_roles_with_incorrect_tag_keys" {
   param "default_action" {
     type        = string
     description = local.description_default_action
-    default     = var.default_action
+    default     = var.incorrect_tag_keys_default_action
   }
 
   param "enabled_actions" {
     type        = list(string)
     description = local.description_enabled_actions
-    default     = var.enabled_actions
+    default     = var.incorrect_tag_keys_enabled_actions
   }
 
   step "query" "detect" {

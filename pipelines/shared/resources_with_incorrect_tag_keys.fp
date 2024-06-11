@@ -37,13 +37,13 @@ pipeline "correct_resources_with_incorrect_tag_keys" {
   param "default_action" {
     type        = string
     description = local.description_default_action
-    default     = var.default_action
+    default     = var.incorrect_tag_keys_default_action
   }
 
   param "enabled_actions" {
     type        = list(string)
     description = local.description_enabled_actions
-    default     = var.enabled_actions
+    default     = var.incorrect_tag_keys_enabled_actions
   }
 
   step "transform" "items_by_id" {
@@ -132,13 +132,13 @@ pipeline "correct_one_resource_with_incorrect_tag_keys" {
   param "default_action" {
     type        = string
     description = local.description_default_action
-    default     = var.default_action
+    default     = var.incorrect_tag_keys_default_action
   }
 
   param "enabled_actions" {
     type        = list(string)
     description = local.description_enabled_actions
-    default     = var.enabled_actions
+    default     = var.incorrect_tag_keys_enabled_actions
   }
 
   step "transform" "remove_keys_display" {
@@ -188,8 +188,8 @@ pipeline "correct_one_resource_with_incorrect_tag_keys" {
             add    = param.add
             remove = param.remove
           }
-          success_msg = "Removed prohitbited tags from ${param.title}."
-          error_msg   = "Error removing prohitbited tags from ${param.title}."
+          success_msg = "Applied changes to tag keys on ${param.title}."
+          error_msg   = "Error applying changes to tag keys on ${param.title}."
         }
       }
     }
