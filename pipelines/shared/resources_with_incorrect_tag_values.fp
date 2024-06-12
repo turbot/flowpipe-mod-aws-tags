@@ -1,5 +1,5 @@
 pipeline "correct_resources_with_incorrect_tag_values" {
-  title         = "" // TODO: Add title
+  title         = "Correct resources with incorrect tag values"
   description   = "" // TODO: Add description
   documentation = "" // TODO: Add documentation
 
@@ -68,7 +68,7 @@ pipeline "correct_resources_with_incorrect_tag_values" {
 }
 
 pipeline "correct_one_resource_with_incorrect_tag_values" {
-  title         = "" // TODO: Add title
+  title         = "Correct one resource with incorrect tag values"
   description   = "" // TODO: Add description
   documentation = "" // TODO: Add documentation
 
