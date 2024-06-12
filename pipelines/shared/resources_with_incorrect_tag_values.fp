@@ -137,7 +137,9 @@ pipeline "correct_one_resource_with_incorrect_tag_values" {
     default     = var.incorrect_tag_keys_enabled_actions
   }
 
-  // TODO: Transform for tag values showing which is replaced with what
+  step "transform" "value_changes" {
+    value = join(", ", [for key in keys(param.new_values) : format("%s: %s => %s", key, param.old_values[key], param.new_values[key])])
+  }
 
   step "transform" "name_display" {
     value = format("%s (%s/%s/%s)", param.title, param.account_id, param.region, param.arn)
@@ -149,7 +151,7 @@ pipeline "correct_one_resource_with_incorrect_tag_values" {
       notifier           = param.notifier
       notification_level = param.notification_level
       approvers          = param.approvers
-      detect_msg         = "" // TODO: Add detect message
+      detect_msg         = format("Detected incorrect tag values on %s, the following changes will be applied: %s", step.transform.name_display.value, step.transform.value_changes.value)
       default_action     = param.default_action
       enabled_actions    = param.enabled_actions
       actions = {
@@ -161,7 +163,7 @@ pipeline "correct_one_resource_with_incorrect_tag_values" {
           pipeline_args = {
             notifier = param.notifier
             send     = param.notification_level == local.level_verbose
-            text     = "Skipped ${param.title} (${param.arn}/${param.arn}) with incorrect tag keys."
+            text     = "Skipped ${param.title} (${param.arn}/${param.arn}) with incorrect tag values."
           }
           success_msg = ""
           error_msg   = ""
