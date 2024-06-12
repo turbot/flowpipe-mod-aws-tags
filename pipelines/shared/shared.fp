@@ -1,7 +1,6 @@
 pipeline "add_and_remove_resource_tags" {
   title         = "Add and remove resource tags"
   description   = "" // TODO: Add description
-  documentation = "" // TODO: Add documentation
 
   param "arn" {
     type        = string
