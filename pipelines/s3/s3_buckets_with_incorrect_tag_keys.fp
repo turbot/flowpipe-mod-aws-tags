@@ -8,7 +8,10 @@ locals {
     replace(
       replace(
         replace(
-          replace(local.tag_keys_query, "__TABLE_NAME__", "aws_s3_bucket"),
+          replace(
+            replace(local.tag_keys_query, "__TABLE_NAME__", "aws_s3_bucket"),
+            "__TITLE__", "name"
+          ),
           "__UPDATE_OVERRIDE__", join("\n",flatten([for key, patterns in var.s3_buckets_with_incorrect_tag_keys_rules.update : [for pattern in patterns : format("      when key %s '%s' then '%s'", (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? element(split(":", pattern), 0) : "="), (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? join(":", slice(split(":", pattern), 1, length(split(":", pattern)))) : pattern), key)]]))
         ),
         "__ALLOW_OVERRIDE__", join("\n", length(var.s3_buckets_with_incorrect_tag_keys_rules.allow) == 0 ? ["      when new_key like '%' then true"] : [for pattern in var.s3_buckets_with_incorrect_tag_keys_rules.allow : format("      when new_key %s '%s' then true", (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? element(split(":", pattern), 0) : "="), (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? join(":", slice(split(":", pattern), 1, length(split(":", pattern)))) : pattern))])

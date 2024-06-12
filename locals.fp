@@ -48,7 +48,7 @@ locals {
   tag_keys_query = <<-EOQ
 with tags as (
   select
-    name as title,
+    __TITLE__ as title,
     arn,
     region,
     account_id,

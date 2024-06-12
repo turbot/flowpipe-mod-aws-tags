@@ -155,7 +155,7 @@ pipeline "correct_one_resource_with_incorrect_tag_keys" {
       notifier           = param.notifier
       notification_level = param.notification_level
       approvers          = param.approvers
-      detect_msg         = format("Detected %s with incorrect tag keys, below are a list of remediations to apply.%s%s", step.transform.name_display.value, step.transform.add_keys_display.value, step.transform.remove_keys_display.value)
+      detect_msg         = format("Detected %s with incorrect tag keys.%s%s", step.transform.name_display.value, step.transform.add_keys_display.value, step.transform.remove_keys_display.value)
       default_action     = param.default_action
       enabled_actions    = param.enabled_actions
       actions = {
