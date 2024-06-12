@@ -199,8 +199,8 @@ __ALLOW_OVERRIDES__
     t.region,
     t.account_id,
     t.cred,
-    jsonb_object_agg(t.key, t.value) filter (where t.value != a.final_value)       as original,
-    jsonb_object_agg(a.key, a.final_value) filter (where t.value != a.final_value) as updated
+    jsonb_object_agg(t.key, t.value) filter (where t.value != a.final_value)       as old_values,
+    jsonb_object_agg(a.key, a.final_value) filter (where t.value != a.final_value) as new_values
   from tags t
   join allow_values a on t.arn = a.arn and t.key = a.key
   group by
@@ -210,6 +210,6 @@ __ALLOW_OVERRIDES__
     t.account_id,
     t.cred
 )
-select * from final where original is not null or updated is not null;
+select * from final where old_values is not null or new_values is not null;
   EOQ
 }
