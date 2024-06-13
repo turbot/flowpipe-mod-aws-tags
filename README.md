@@ -209,8 +209,8 @@ s3_buckets_with_incorrect_tag_keys_rules = {
   allow   = []
   remove  = []
   update  = {
-    env         = ["~*:^environment$", "~*:$env$", "enviroment"]
-    cost_center = ["~*:cc","~*:^cost_cent[er|re]$", "~*:^costcent[er|re]$"]
+    env         = ["~*:^environment$", "~*:^env$", "enviroment"]
+    cost_center = ["ilike:cc","~*:^cost_cent[er|re]$", "~*:^costcent[er|re]$"]
   }
 }
 ```
