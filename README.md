@@ -223,9 +223,17 @@ flowpipe pipeline run detect_and_correct_s3_buckets_with_incorrect_tag_keys --va
 
 #### Combining Key Rules
 
-> TODO: Explain how to combine the rules and the ordering of how these are processed.
+You can combine all of the properties to make more complex rule sets, which will apply the rules in the following order:
+- `update`, will apply any corrections first, to ensure that the other rule options are working on a corrected set of tag keys.
+- `require`, will then check the `updated` tag keys and if any `required` keys are missing, they will be added to the collection with the associated `default` value.
+- `allow`, will then check the tag keys against any patterns (if no patterns are set for `allow`, it defaults to allowing all), if a key fails to match a pattern it will be marked for removal.
+- `remove`, finally will collate any tags matching the `remove` patterns, with tag keys that were replaced by the `update` and marked for `removal` in the `allow` step and establish a complete list of tags to be removed.
 
-> TODO: Might be worth converting this whole area to more little lisper where we explain the rule properties one at a time and slowly build the complex example?
+The below example shows the following behavior:
+- `update` will perform common corrections to consolidate typos and old standards of keys to new keys, to ensure we use `env` and `cost_center` where any of the patterns are matched.
+- `require` will then ensure every S3 bucket has the `env`, `owner` and `cost_center` tags, for example if a bucket didn't have an `owner` tag, it would be applied with the `default_owner` value.
+- `allow` will then ensure that the patterns provided are the only allowed tags and mark others for removal, in this instance `env`, `owner`, `cost_center` or any beginning with `turbot`.
+- `remove` has been left empty as we've used `allow` which is a much more restrictive type, ideally you would only use one of these.
 
 ```hcl
 # file: keys.fpvars
@@ -239,8 +247,8 @@ s3_buckets_with_incorrect_tag_keys_rules = {
   allow   = ["env", "owner", "cost_center", "~*:^turbot"]
   remove  = []
   update  = {
-    env         = ["~*:^environment$", "~*:$env$", "enviroment"]
-    cost_center = ["~*:cc","~*:^cost_cent[er|re]$", "~*:^costcent[er|re]$"]
+    env         = ["~*:^environment$", "~*:^env$", "enviroment"]
+    cost_center = ["~*:^cc$","~*:^cost_cent[er|re]$", "~*:^costcent[er|re]$"]
   }
 }
 ```
@@ -311,9 +319,11 @@ flowpipe pipeline run detect_and_correct_s3_buckets_with_incorrect_tag_values --
 
 #### Combining Value Rules
 
-> TODO: Explain how to combine the rules and the ordering of how these are processed.
+Again, similarly to the key rules, you can combine the value rules together to create a more complex rule set.
 
-> TODO: Might be worth converting this whole area to more little lisper where we explain the rule properties one at a time and slowly build the complex example?
+In a similar fashion to the key rules, the first to be applied are the `update` corrections.
+
+Once these corrections are taken into account, any values that match patterns of `remove` or do not match a pattern in `allow` are then amended to be the value default as `default`.
 
 ```hcl
 # file: values.fpvars
