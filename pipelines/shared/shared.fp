@@ -33,7 +33,7 @@ pipeline "add_and_remove_resource_tags" {
       cred          = param.cred
       region        = param.region
       resource_arns = [param.arn]
-      tags          = param.add_tags
+      tags          = param.add
     }
   }
 
@@ -44,7 +44,7 @@ pipeline "add_and_remove_resource_tags" {
       cred          = param.cred
       region        = param.region
       resource_arns = [param.arn]
-      tag_keys      = param.remove_tag_keys
+      tag_keys      = param.remove
     }
   }
 }
