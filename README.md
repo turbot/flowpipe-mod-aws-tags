@@ -210,7 +210,7 @@ s3_buckets_with_incorrect_tag_keys_rules = {
   remove  = []
   update  = {
     env         = ["~*:^environment$", "~*:^env$", "enviroment"]
-    cost_center = ["ilike:cc","~*:^cost_cent[er|re]$", "~*:^costcent[er|re]$"]
+    cost_center = ["ilike:cc","~*:^cost_cent(er|re)$", "~*:^costcent(er|re)$"]
   }
 }
 ```
@@ -248,7 +248,7 @@ s3_buckets_with_incorrect_tag_keys_rules = {
   remove  = []
   update  = {
     env         = ["~*:^environment$", "~*:^env$", "enviroment"]
-    cost_center = ["~*:^cc$","~*:^cost_cent[er|re]$", "~*:^costcent[er|re]$"]
+    cost_center = ["~*:^cc$","~*:^cost_cent(er|re)$", "~*:^costcent(er|re)$"]
   }
 }
 ```
