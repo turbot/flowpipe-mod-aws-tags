@@ -5,7 +5,7 @@
 #approvers          = []
 #max_concurrency    = 1
 
-#tag_rules = {
+#base_tag_rules = {
 #  add           = {}
 #  remove        = []
 #  remove_except = []

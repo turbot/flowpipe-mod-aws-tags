@@ -43,7 +43,17 @@ locals {
 }
 
 locals {
-  operators = ["~", "~*", "like", "ilike", "!=", "="]
+  base_tag_rules = {
+    add           = try(var.base_tag_rules.add, {})
+    remove        = try(var.base_tag_rules.remove, [])
+    remove_except = try(var.base_tag_rules.remove_except, [])
+    update_keys   = try(var.base_tag_rules.update_keys, {})
+    update_values = try(var.base_tag_rules.update_values, {})
+  }
+}
+
+locals {
+  operators = ["~", "~*", "like", "ilike", "=", "!="]
 
 //   tag_keys_query = <<-EOQ
 // with tags as (

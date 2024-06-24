@@ -28,6 +28,23 @@ variable "max_concurrency" {
   default     = 1
 }
 
+variable "incorrect_tags_default_action" {
+  type        = string
+  description = "The default action to take when no approvers are specified."
+  default     = "notify"
+}
+
+variable "base_tag_rules" {
+  type = object({
+    add           = optional(map(string))
+    remove        = optional(list(string))
+    remove_except = optional(list(string))
+    update_keys   = optional(map(list(string)))
+    update_values = optional(map(map(list(string))))
+  })
+  description = "" // TODO: Add Description
+}
+
 // variable "incorrect_tag_keys_default_action" {
 //   type        = string
 //   description = "The default action to take when no approvers are specified."
