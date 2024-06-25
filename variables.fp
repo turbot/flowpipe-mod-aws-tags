@@ -40,7 +40,7 @@ variable "base_tag_rules" {
     remove        = optional(list(string))
     remove_except = optional(list(string))
     update_keys   = optional(map(list(string)))
-    update_values = optional(map(map(list(string))))
+    update_values = optional(map(map(list(string)))) // TODO: list(string) -> any and coerce for the `default` non-matching others approach
   })
   description = "" // TODO: Add Description
 }
