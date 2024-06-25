@@ -261,6 +261,112 @@ This ensures that:
 - Thirdly, any tags that are no longer required are removed.
 - Finally, the values are updated as required.
 
+#### Resource-Specific Tag Rules
+
+In addition to defining `base_tag_rules`, you can also provide the same object at a resource level, such as `s3_buckets_tag_rules`. These resource-specific rules will be merged with the `base_tag_rules` to create a comprehensive set of tag rules for each resource.
+
+When merging the `base_tag_rules` with resource-specific rules, the following behaviors apply:
+
+- **Maps** (e.g., `add`, `update_keys`, `update_values`): The maps from the resource-specific rules will be merged with the corresponding maps in the `base_tag_rules`. If a key exists in both the base rules and the resource-specific rules, the value from the resource-specific rules will take precedence.
+- **Lists** (e.g., `remove`, `remove_except`): The lists from both the base and resource-specific rules will be merged/concatenated and then deduplicated to ensure that all unique entries from both lists are included.
+
+Let's say you have base_tag_rules defined as follows:
+
+```hcl
+base_tag_rules = {
+  add = {
+    environment = "unknown"
+    cost_center = "0123456789"
+    owner       = "turbie"
+  }
+  remove = ["~*:password", "ilike:secret%"]
+  remove_except = []
+  update_keys = {
+    environment = ["env", "ilike:enviro%"]
+    cost_center = ["cc", "~*:^cost_cent(er|re)$", "~*:^costcent(er|re)$"]
+  }
+  update_values = {
+    environment = {
+      production        = ["~*:^prod"]
+      test              = ["~*:^test", "~*:^uat$"]
+      development       = ["~*:^dev"]
+      quality_assurance = ["~*:^qa$", "ilike:%quality%"]
+    }
+    cost_center = {
+      "0123456789" = ["~:[^0-9]"]
+    }
+    owner = {
+      Bob = ["~*:^nathan$", "ilike:Dave"]
+    }
+  }
+}
+```
+
+And you want to apply additional rules to S3 buckets:
+
+```hcl
+s3_bucket_tag_rules = {
+  add = {
+    resource_type = "bucket"
+  }
+  remove = ["ilike:secret%", "~*:key$"]
+  remove_except = []
+  update_keys = {
+    environment = ["~*:^env"]
+    owner       = ["~*:^owner$", "~*:manager$"]
+  }
+  update_values = {
+    owner = {
+      Bob = ["~*:^dave$"]
+    }
+  }
+}
+```
+
+When merged, the resulting tag rules for S3 buckets will be:
+
+```hcl
+{
+  add = {
+    environment   = "unknown"
+    cost_center   = "0123456789"
+    owner         = "turbie"
+    resource_type = "bucket"
+  }
+  remove = ["~*:password", "ilike:secret%", "~*:key$"]
+  remove_except = []
+  update_keys = {
+    environment = ["~*:^env"]
+    cost_center = ["cc", "~*:^cost_cent(er|re)$", "~*:^costcent(er|re)$"]
+    owner       = ["~*:^owner$", "~*:manager$"]
+  }
+  update_values = {
+    environment = {
+      production        = ["~*:^prod"]
+      test              = ["~*:^test", "~*:^uat$"]
+      development       = ["~*:^dev"]
+      quality_assurance = ["~*:^qa$", "ilike:%quality%"]
+    }
+    cost_center = {
+      "0123456789" = ["~:[^0-9]"]
+    }
+    owner = {
+      Bob = ["~*:^dave$"]
+    }
+  }
+}
+```
+
+In this example:
+
+- The `add` map includes entries from both `base_tag_rules` and `s3_bucket_tag_rules`.
+- The `remove` list is a concatenation of entries from both lists, ensuring no duplicates (`"ilike:secret%"` appears only once).
+- The `remove_except` list remains empty as specified in both rules.
+- The `update_keys` map merges entries, with the resource-specific rules for environment and owner overriding the base rules entirely.
+- The `update_values` map shows that the resource-specific rule for `owner` overrides the base rule for the same key.
+
+By providing resource-specific tag rules, you can customize and extend the base tagging strategy to meet the unique requirements of individual resources, ensuring flexibility and consistency in your tag management.
+
 #### Supported Operators
 
 The below table shows the currently supported operators for pattern-matching.
@@ -273,7 +379,54 @@ The below table shows the currently supported operators for pattern-matching.
 | `~`      | Case-sensitive pattern matching using `regex` patterns. | 
 | `~*`     | Case-insensitive pattern matching using `regex` patterns. | 
 
-If you attempt to use an operator *not* in the above table, the string will be processed as an exact match, e.g: `!~:^bob` wouldn't match anything that doesn't begin with `bob` but instead only matches if it is exactly `!~:^bob`.
+If you attempt to use an operator *not* in the table above, the string will be processed as an exact match.
+For example,  `!~:^bob` wouldn't match anything that doesn't begin with `bob`; instead, it would only match if the key/value is exactly `!~:^bob`.
+
+### Running Detect and Correct Pipelines
+
+> Note: Prior to running Detect and Correct pipelines, you should ensure you've [configured](#configuring-tag-rules) your tagging ruleset.
+
+To run your first detection, you'll need to ensure your Steampipe server is up and running:
+
+```sh
+steampipe service start
+```
+
+To find your desired detection, you can filter the `pipeline list` output:
+
+```sh
+flowpipe pipeline list | grep "detect_and_correct"
+```
+
+Then run your chosen pipeline:
+
+```sh
+flowpipe pipeline run detect_and_correct_s3_buckets_with_incorrect_tags
+```
+
+By default the above approach would find the relevant resources and then send a message to your configured [notifier](https://flowpipe.io/docs/reference/config-files/notifier).
+
+However;  you can request via an [Input Step](https://flowpipe.io/docs/build/input) a corrective action to run against each detection result; this behavior is achieved by setting `approvers` either as a variable or for a one-off approach, by passing `approvers` as an argument.
+
+> Note: This approach requires running `flowpipe server` as it uses an `input` step.
+
+```sh
+flowpipe pipeline run detect_and_correct_s3_buckets_with_incorrect_tags --host local --arg='approvers=["default"]'
+```
+
+If you're happy to just apply the same action against all detected items, you can apply them without the `input` step by overriding the `default_action` argument (or the detection specific variable).
+
+```sh
+flowpipe pipeline run detect_and_correct_s3_buckets_with_incorrect_tags --arg='default_action="apply"'
+```
+
+However; if you have configured a non-empty list for your `approvers` variable, you will need to override it as below:
+
+```sh
+flowpipe pipeline run detect_and_correct_s3_buckets_with_incorrect_tags --arg='approvers=[]' --arg='default_action="apply"'
+```
+
+Finally, each detection pipeline has a corresponding [Query Trigger](https://flowpipe.io/docs/flowpipe-hcl/trigger/query), these are disabled by default allowing for you to configure only those which are required, see the [docs](https://hub.flowpipe.io/mods/turbot/aws_tags/triggers) for more information.
 
 ## Open Source & Contributing
 
