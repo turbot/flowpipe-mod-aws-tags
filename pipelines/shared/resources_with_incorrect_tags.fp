@@ -1,7 +1,7 @@
-pipeline "correct_resources_with_incorrect_tag_keys" {
-  title         = "Correct resources with incorrect tag keys"
-  description   = "" // TODO: Add description
-  documentation = "" // TODO: Add documentation
+pipeline "correct_resources_with_incorrect_tags" {
+  title         = "Correct resources with incorrect tags"
+  description   = "" // TODO: Add Description
+  documentation = "" // TODO: Add Documentation
 
   param "items" {
     type = list(object({
@@ -11,7 +11,7 @@ pipeline "correct_resources_with_incorrect_tag_keys" {
       account_id = string
       cred       = string
       remove     = list(string)
-      add        = map(string)
+      upsert     = map(string)
     }))
     description = local.description_items
   }
@@ -37,19 +37,13 @@ pipeline "correct_resources_with_incorrect_tag_keys" {
   param "default_action" {
     type        = string
     description = local.description_default_action
-    default     = var.incorrect_tag_keys_default_action
-  }
-
-  param "enabled_actions" {
-    type        = list(string)
-    description = local.description_enabled_actions
-    default     = var.incorrect_tag_keys_enabled_actions
+    default     = var.incorrect_tags_default_action
   }
 
   step "pipeline" "correct_one" {
     for_each        = { for row in param.items : row.arn => row }
     max_concurrency = var.max_concurrency
-    pipeline        = pipeline.correct_one_resource_with_incorrect_tag_keys
+    pipeline        = pipeline.correct_one_resource_with_incorrect_tags
     args = {
       title              = each.value.title
       arn                = each.value.arn
@@ -57,18 +51,17 @@ pipeline "correct_resources_with_incorrect_tag_keys" {
       cred               = each.value.cred
       account_id         = each.value.account_id
       remove             = each.value.remove
-      add                = each.value.add
+      upsert             = each.value.upsert
       notifier           = param.notifier
       notification_level = param.notification_level
       approvers          = param.approvers
       default_action     = param.default_action
-      enabled_actions    = param.enabled_actions
     }
   }
 }
 
-pipeline "correct_one_resource_with_incorrect_tag_keys" {
-  title         = "Correct one resource with incorrect tag keys"
+pipeline "correct_one_resource_with_incorrect_tags" {
+  title         = "Correct one resource with incorrect tags"
   description   = "" // TODO: Add description
   documentation = "" // TODO: Add documentation
 
@@ -102,7 +95,7 @@ pipeline "correct_one_resource_with_incorrect_tag_keys" {
     description = "" // TODO: Add description
   }
 
-  param "add" {
+  param "upsert" {
     type        = map(string)
     description = "" // TODO: Add description
   }
@@ -128,21 +121,15 @@ pipeline "correct_one_resource_with_incorrect_tag_keys" {
   param "default_action" {
     type        = string
     description = local.description_default_action
-    default     = var.incorrect_tag_keys_default_action
-  }
-
-  param "enabled_actions" {
-    type        = list(string)
-    description = local.description_enabled_actions
-    default     = var.incorrect_tag_keys_enabled_actions
+    default     = var.incorrect_tags_default_action
   }
 
   step "transform" "remove_keys_display" {
-    value = length(param.remove) > 0 ? format(" Tag keys that will be removed: %s.", join(", ", param.remove)) : ""
+    value = length(param.remove) > 0 ? format(" Tags that will be removed: %s.", join(", ", param.remove)) : ""
   }
 
-  step "transform" "add_keys_display" {
-    value = length(param.add) > 0 ? format(" Tags that will be added: %s.", join(", ", [for key, value in param.add : format("%s=%s", key, value)])) : ""
+  step "transform" "upsert_keys_display" {
+    value = length(param.upsert) > 0 ? format(" Tags that will be added or updated: %s.", join(", ", [for key, value in param.upsert : format("%s=%s", key, value)])) : ""
   }
 
   step "transform" "name_display" {
@@ -155,9 +142,9 @@ pipeline "correct_one_resource_with_incorrect_tag_keys" {
       notifier           = param.notifier
       notification_level = param.notification_level
       approvers          = param.approvers
-      detect_msg         = format("Detected %s with incorrect tag keys.%s%s", step.transform.name_display.value, step.transform.add_keys_display.value, step.transform.remove_keys_display.value)
+      detect_msg         = format("Detected %s with incorrect tags.%s%s", step.transform.name_display.value, step.transform.upsert_keys_display.value, step.transform.remove_keys_display.value)
       default_action     = param.default_action
-      enabled_actions    = param.enabled_actions
+      enabled_actions    = ["skip", "apply"]
       actions = {
         "skip" = {
           label        = "Skip"
@@ -167,7 +154,7 @@ pipeline "correct_one_resource_with_incorrect_tag_keys" {
           pipeline_args = {
             notifier = param.notifier
             send     = param.notification_level == local.level_verbose
-            text     = "Skipped ${param.title} (${param.arn}/${param.arn}) with incorrect tag keys."
+            text     = "Skipped ${param.title} (${param.arn}/${param.arn}) with incorrect tags."
           }
           success_msg = ""
           error_msg   = ""
@@ -181,11 +168,11 @@ pipeline "correct_one_resource_with_incorrect_tag_keys" {
             cred   = param.cred 
             region = param.region
             arn    = param.arn
-            add    = param.add
+            add    = param.upsert
             remove = param.remove
           }
-          success_msg = "Applied changes to tag keys on ${param.title}."
-          error_msg   = "Error applying changes to tag keys on ${param.title}."
+          success_msg = "Applied changes to tags on ${param.title}."
+          error_msg   = "Error applying changes to tags on ${param.title}."
         }
       }
     }

@@ -62,301 +62,371 @@ flowpipe mod install
 
 ### Configuration
 
-> TODO: General set-up configuration, etc.
+To start using this mod, you need to configure some [input variables](https://flowpipe.io/docs/build/mod-variables#input-variables).
 
-Prior to running a detect and correct pipeline for a specific resource, you will need to configure the rules for the resource tag keys as well as another variable for the resource tag values.
+The simplest way to do this is to copy the example file `tags.fpvars.example` to `tags.fpvars`, and then update the values as needed. Alternatively, you can pass the variables directly via the command line or environment variables. For more details on these methods, see [passing input variables](https://flowpipe.io/docs/build/mod-variables#passing-input-variables).
 
-When configuring these rules you will be able to specify lists of `pattern strings` for the `allow`, `remove` and `update` property values, these can either be in the format of `value` or `operator:value`.
+```sh
+cp tags.fpvars.example tags.fpvars
+vi tags.fpvars
+```
 
-- `value` is an exact match on the given value, using the `=` operator in postgres. For example `bob` will only ever match exactly on `bob`.
-- `operator:value` is for specifying a postgres operator and then the value (or regex/pattern/etc) that will be applied by that operator. The supported operators are:
-  - `~` 
-  - `~*`
-  - `like`
-  - `ilike`
-  - `=` 
-  - `!=`
+> TODO: Docs on the core variables: database, approvers, etc.
 
-The variables which need to be configured (per resource) are in the following shapes defined below:
+### Configuring Tag Rules
 
-**Key Example:**
+The `base_tag_rules` variable is an object defined as below. It allows you to specify how tags should be managed on your resources. Let's break down each attribute and how you can configure it for specific use cases.
+
 ```hcl
-variable "s3_buckets_with_incorrect_tag_keys_rules" {
+variable "base_tag_rules" {
   type = object({
-    require = map(string)
-    allow   = list(string)
-    remove  = list(string)
-    update  = map(list(string))
+    add           = optional(map(string))
+    remove        = optional(list(string))
+    remove_except = optional(list(string))
+    update_keys   = optional(map(list(string)))
+    update_values = optional(map(map(list(string))))
   })
 }
 ```
 
-- `require` : This is a set of `key:value` pairs where if the given key doesn't exist on a resource it can be applied with the provided value.
-- `allow`   : This is a list of pattern strings, if not empty any keys which do not match any of the patterns will recommended for removal.
-- `remove`  : This is a list of pattern strings, if not empty any keys matching any of the patterns will be recommended for removal.
-- `update`  : This is a map of replacement tag keys and pattern strings, where any tag key matching a pattern will be recommended to be created with the new tag key (& existing value), while the old tag key will be recommended for removal.
+#### Add: Ensuring Resources Have Mandatory Tags
 
-**Value Example:**
-```hcl
-variable "s3_buckets_with_incorrect_tag_values_rules" {
-  type = map(object({
-    default = string
-    allow   = list(string)
-    remove  = list(string)
-    update  = map(list(string))
-  }))
-}
-```
-
-- `default` : This is a string `value` which will be applied to the tag with a key matching the parent `map` key, if the key matches a pattern in `remove` or doesn't match any pattern given in `allow`.
-- `allow`   : This is a list of patterns to apply to the value of a given tag key. If empty all values are allowed, if non-empty, any value for given key not matching a pattern here will have the value replaced by the defined `default`.
-- `remove`  : This is a list of patterns to apply to the value of a given tag key. If the value matches any of these patterns, it will be replaced by the value defined as `default`.
-- `update`  : This is a map of replacement values (map keys), to apply to the given tag key if the value matches any of the patterns defined in the list.
-
-Below are some examples of using these rules to fix common tagging issues, for simplicity these will assume you configure the rules in `fpvars` files as opposed to passing them on the command line as arguments, although this is possible.
-
-#### Prohibited Tag Keys
-
-We may have some keys on our resources which we want to remove, for example `password`, this can be achieved by simply setting this in the `remove` property of our variable as shown below:
+If you require all your resources to have at least `environment` and `owner` tags, you can use the `add` attribute to apply these tags to resources that currently do not have the specific tag along with a default value.
 
 ```hcl
-# file: prohibited.fpvars
-# other configuration options omitted for brevity
-s3_buckets_with_incorrect_tag_keys_rules = {
-  require = {}
-  allow   = []
-  remove  = ["password"]
-  update  = {}
-}
-```
-
-We should then be able to run the below command referencing our `prohibited.fpvars` file, to perform detection and correction of resources which violate the provided rules:
-
-```sh
-flowpipe pipeline run detect_and_correct_s3_buckets_with_incorrect_tag_keys --var-file=prohibited.fpvars
-```
-
-A more realistic example however may be to check if as have `password` anywhere in the key, in any casing, as well as other key phrases like ending with `key` or starting with `secret`:
-
-```hcl
-# file: prohibited.fpvars
-# other configuration options omitted for brevity
-s3_buckets_with_incorrect_tag_keys_rules = {
-  require = {}
-  allow   = []
-  remove  = ["~*:password", "ilike:secret%", "~*:key$"]
-  update  = {}
-}
-```
-
-An alternative approach would be to remove all tags which do not match our expecting / desired tag keys based, this can be done by using the `allow` property instead. For example, lets assume that we only want tags which are `env`, `owner`, `cost_center` or prefixed with our company name `turbot_`, we could use the following:
-
-```hcl
-# file: prohibited.fpvars
-# other configuration options omitted for brevity
-s3_buckets_with_incorrect_tag_keys_rules = {
-  require = {}
-  allow   = ["env", "owner", "cost_center", "ilike:turbot\_%"]
-  remove  = []
-  update  = {}
-}
-```
-
-Then running the below command should recommend we remove any other tags.
-
-```sh
-flowpipe pipeline run detect_and_correct_s3_buckets_with_incorrect_tag_keys --var-file=prohibited.fpvars
-```
-
-#### Mandatory Tags
-
-Another common problem is that we may have tags which we need to have on all our resources, for this we can find resources without these tags and apply a default value using the `require` rule.
-
-For example, we should ensure we have an `env` tag, in the below example we will set the value to be `not set`, we may also want to ensure we have an `owner` tag our default owner will be `bob`.
-
-```hcl
-# file: mandatory.fpvars
-# other configuration options omitted for brevity
-s3_buckets_with_incorrect_tag_keys_rules = {
-  require = {
-    env   = "not set"
-    owner = "bob" 
-  }
-  allow   = []
-  remove  = []
-  update  = {}
-}
-```
-
-We can then apply this to our resources by running the relevant detect and correct pipeline passing our file to set the rules:
-
-```sh
-flowpipe pipeline run detect_and_correct_s3_buckets_with_incorrect_tag_keys --var-file=mandatory.fpvars
-```
-
-#### Standardizing / Renaming Tag Keys
-
-Over time, tag key standards may change meaning that we may need to change the key but retain our existing value. This can be achieved by using our `update` property, shown below is an example where we want the following changes:
-
-- Case-insensitive matching on `environment`, `env` or a typo `enviroment` => `env`
-- Case-insensitive matching on `cc`, `costcenter`, `cost_center` or the common typo using `re` => `cost_center`
-
-```hcl
-# file: standards.fpvars
-# other configuration options omitted for brevity
-s3_buckets_with_incorrect_tag_keys_rules = {
-  require = {}
-  allow   = []
-  remove  = []
-  update  = {
-    env         = ["~*:^environment$", "~*:^env$", "enviroment"]
-    cost_center = ["ilike:cc","~*:^cost_cent(er|re)$", "~*:^costcent(er|re)$"]
+base_tag_rules = {
+  add = {
+    environment = "unknown"
+    owner       = "turbie"
   }
 }
 ```
 
-Running these rules will then detect any matches, and for each recommend that we add the new tag with the existing matched tags value and then remove the original matched tag:
+In this example, the map key is the tag you want to ensure exists on your resources, and the value is the default value to apply.
 
-```sh
-flowpipe pipeline run detect_and_correct_s3_buckets_with_incorrect_tag_keys --var-file=standards.fpvars
-```
+#### Remove: Ensuring Resources Don't Have Prohibited Tags 
 
-#### Combining Key Rules
+Over time, tags can accumulate on your resources for various reasons. You can use the `remove` attribute to clean up tags that are no longer wanted or allowed from your resources.
 
-You can combine all of the properties to make more complex rule sets, which will apply the rules in the following order:
-- `update`, will apply any corrections first, to ensure that the other rule options are working on a corrected set of tag keys.
-- `require`, will then check the `updated` tag keys and if any `required` keys are missing, they will be added to the collection with the associated `default` value.
-- `allow`, will then check the tag keys against any patterns (if no patterns are set for `allow`, it defaults to allowing all), if a key fails to match a pattern it will be marked for removal.
-- `remove`, finally will collate any tags matching the `remove` patterns, with tag keys that were replaced by the `update` and marked for `removal` in the `allow` step and establish a complete list of tags to be removed.
-
-The below example shows the following behavior:
-- `update` will perform common corrections to consolidate typos and old standards of keys to new keys, to ensure we use `env` and `cost_center` where any of the patterns are matched.
-- `require` will then ensure every S3 bucket has the `env`, `owner` and `cost_center` tags, for example if a bucket didn't have an `owner` tag, it would be applied with the `default_owner` value.
-- `allow` will then ensure that the patterns provided are the only allowed tags and mark others for removal, in this instance `env`, `owner`, `cost_center` or any beginning with `turbot`.
-- `remove` has been left empty as we've used `allow` which is a much more restrictive type, ideally you would only use one of these.
+The example below shows how to remove any tags from our resources that are `password`, `secret` or `key`.
 
 ```hcl
-# file: keys.fpvars
-# other configuration options omitted for brevity
-s3_buckets_with_incorrect_tag_keys_rules = {
-  require = {
-    env         = "not set"
-    owner       = "default_owner"
-    cost_center = "default_cc" 
-  }
-  allow   = ["env", "owner", "cost_center", "~*:^turbot"]
-  remove  = []
-  update  = {
-    env         = ["~*:^environment$", "~*:^env$", "enviroment"]
-    cost_center = ["~*:^cc$","~*:^cost_cent(er|re)$", "~*:^costcent(er|re)$"]
+base_tag_rules = {
+  remove = ["password", "secret", "key"]
+}
+```
+
+However, the above example only caters to exact matches on those strings. Since keys in AWS are case-insensitive, we might miss tags like `Password` or `ssh_key` as these aren't exact matches.
+
+To achieve these kinds of matches, we support an `operator:pattern` syntax which takes a PostgreSQL operator and a pattern separated by a `:`. For more information on these see the [Supported Operators](#supported-operators) section. 
+
+A more realistic approach would be to remove tags which contains `password`, begins with `secret` or ends with `key`, and these should all be case-insensitive matches. This would look like the example below.
+
+```hcl
+base_tag_rules = {
+  remove = ["~*:password", "ilike:secret%", "~*:key$"]
+}
+```
+
+Any tags which do not match one of the patterns in the list will be retained.
+
+#### Remove Except: Ensuring Resources Only Have Permitted Tags
+
+Another approach to cleaning up your tags is to ensure that you only have those that are desired or permitted and that all others are removed. You can use the `remove_except` attribute to define a list of patterns for retaining matching tags, where all other tags are removed.
+
+As this is the inverse behavior of `remove`, it is recommended that you only use one of these attributes to avoid conflicts. Both follow the same `operator:pattern` matching behavior.
+
+Lets say we want to ensure our resources **only** have the following tags:
+- `environment`
+- `owner`
+- `cost_center`
+- Any that are prefixed with our company name `turbot`
+
+This would look like the following example:
+
+```hcl
+base_tag_rules = {
+  remove_except = ["environment", "owner", "cost_center", "~:^turbot"]
+}
+```
+
+Any tags which do not match one of the above patterns will be removed from the resources.
+
+#### Update Keys: Ensuring Tag Keys Are Standardized
+
+Over time your tagging standards may change or you may have variants of the same tag that you wish to standardize, you can use the `update_keys` attribute to reconcile tags to a standardized set.
+
+For example, we may have want to consolidate tags for `environment` and `cost_center` where we've previously used shorthand tags for our standard (`env` and `cc`), as well as remediate common spelling errors such as `enviroment` or `cost_centre`.
+
+```hcl
+base_tag_rules = {
+  update_keys = {
+    environment = ["env", "ilike:enviro%"]
+    cost_center = ["cc", "~*:^cost_cent(er|re)$", "~*:^costcent(er|re)$"]
   }
 }
 ```
 
-```sh
-flowpipe pipeline run detect_and_correct_s3_buckets_with_incorrect_tag_values --var-file=keys.fpvars
-```
+Behind the scenes, this works by creating a new tag with the value of existing matched tag and then removing the existing matched tag.
 
-#### Standardizing / Correcting Typos In Tag Values
+#### Update Values: Ensuring Tag Values Are Standardized
 
-In a similar fashion to keys, expected values can change over time and may need to be adjusted, this can be done using our `update` property on our value rules.
+Similarly to keys, you may want to change the standards of the values over time or correct common typos. You can use the `update_values` attribute to reconcile values to expected standards.
 
-For example our `env` key, we may now want to support short versions `dev`, `prod`, `qa`, instead of previously used long names `development`, `production`, `quality_assurance`. 
+This works in a similar way to `update_keys` except that there is an extra layer of nesting to group the updates on a per-key basis.
+
+For example, lets say that you want to ensure the following happens:
+- For `environment` tag, any previous shorthand or aliases are standardized into the long version of the name as the new standard.
+- For `cost_center` tag, any values which have non-numeric characters are replaced by your default cost center.
+- For `owner` tag, anything previously held by `Nathan` or `Dave` is now owned by `Bob`.
 
 ```hcl
-# file: standards.fpvars
-# other configuration options omitted for brevity
-s3_buckets_with_incorrect_tag_values_rules = {
-  env = {
-    default = ""
-    allow   = []
-    remove  = []
-    update  = {
-      prod = ["~*:^production$", "~*:^produktion$"]
-      dev  = ["ilike:devel%"]
-      qa   = ["~*:^quality_ass"]
+base_tag_rules = {
+  update_values = {
+    environment = {
+      production        = ["~*:^prod"]
+      test              = ["~*:^test", "~*:^uat$"]
+      development       = ["~*:^dev"]
+      quality_assurance = ["~*:^qa$", "ilike:%quality%"]
+    }
+    cost_center = {
+      "0123456789" = ["~:[^0-9]"]
+    }
+    owner = {
+      Bob = ["~*:^nathan$", "ilike:Dave"]
     }
   }
 }
 ```
 
-We should then be able to run our detect and correct pipeline for the specific resource with incorrect tag values and ascertain which values will be updated.
+<!-- TODO: Add documentation about `default` for non-matching values if we get this in. -->
 
-```sh
-flowpipe pipeline run detect_and_correct_s3_buckets_with_incorrect_tag_values --var-file=standards.fpvars
-```
+#### Complete Tag Rules
 
-#### Expected/Invalid Tag Values
+Now that you understand each of the attributes available in the `base_tag_rules` object individually, you can combine them to create a complex ruleset for managing your resource tags. By leveraging multiple attributes together you can achieve sophisticated tagging strategies.
 
-In a similar approach to keys, values may also want to be within an expected set of values / patterns. This can be done per key to specify an allowed set of values and a default value to apply if any values do not match one of the allowed patterns.
+> Note: Using `remove` / `remove_except`
+>
+> Ideally, you should use either the `remove` or the `remove_except` attribute, but not both simultaneously. This ensures clarity in your tag removal logic and avoids potential conflicts.
+>
+> - `remove`: Use this to specify patterns of tags you want to explicitly remove.
+>- `remove_except`: Use this to specify patterns of tags you want to retain, removing all others.
 
-The below example demonstrates ensuring that our `env` tag has values of `dev`, `prod`, `qa` or `not set` and if any other value is detected, it will be recommended to be changed to `not set`, similarly we also state that `cost_centre` should be numeric, if not we replace it with our default.
+When using a combination of attributes to build a complex ruleset, they will be executed in the following order to ensure logical application of the rules:
 
-```hcl
-# file: expected_values.fpvars
-# other configuration options omitted for brevity
-s3_buckets_with_incorrect_tag_values_rules = {
-  env = {
-    default = "not set"
-    allow   = ["dev", "prod", "qa", "not set"]
-    remove  = []
-    update  = {}
-  }
-  cost_center = {
-    default = "0123456789"
-    allow   = ["~:^[0-9]+$"]
-    remove  = []
-    update  = {}
-  }
-}
-```
+1. `update_keys`: Start by updating any incorrect keys to the new expected values.
+2. `add`: Add missing mandatory tags with a default value. This is done after updating the keys to ensure that if update has the same tag, the value isn't overwritten with the default but kept.
+3. `remove`/`remove_except`: Remove any tags no longer required based on the patterns provided and old tags which have been updated.
+4. `update_values`: Finally once the tags have been established, the values will be reconciled as desired.
 
-We should then be able to run our detect and correct pipeline for the specific resource with incorrect tag values and ascertain which values will be updated.
-
-```sh
-flowpipe pipeline run detect_and_correct_s3_buckets_with_incorrect_tag_values --var-file=expected_values.fpvars
-```
-
-#### Combining Value Rules
-
-Again, similarly to the key rules, you can combine the value rules together to create a more complex rule set.
-
-In a similar fashion to the key rules, the first to be applied are the `update` corrections.
-
-Once these corrections are taken into account, any values that match patterns of `remove` or do not match a pattern in `allow` are then amended to be the value default as `default`.
+Lets combine some of the above examples to create a complex ruleset.
 
 ```hcl
-# file: values.fpvars
-# other configuration options omitted for brevity
-s3_buckets_with_incorrect_tag_values_rules = {
-  env = {
-    default = "not set"
-    allow   = ["dev", "prod", "qa", "not set"]
-    remove  = []
-    update  = {
-      prod = ["~*:^production$", "~*:^produktion$"]
-      dev  = ["ilike:dev%"]
-      qa   = ["~*:^quality_ass"]
+base_tag_rules = {
+  update_keys = {
+    environment = ["env", "ilike:enviro%"]
+    cost_center = ["cc", "~*:^cost_cent(er|re)$", "~*:^costcent(er|re)$"]
+  }
+  add = {
+    environment = "unknown"
+    owner       = "turbie"
+    cost_center = "0123456789"
+  }
+  remove_except = [
+    "environment", 
+    "owner", 
+    "cost_center", 
+    "~:^turbot"
+  ]
+  update_values = {
+    environment = {
+      production        = ["~*:^prod"]
+      test              = ["~*:^test", "~*:^uat$"]
+      development       = ["~*:^dev"]
+      quality_assurance = ["~*:^qa$", "ilike:%quality%"]
+    }
+    cost_center = {
+      "0123456789" = ["~:[^0-9]"]
+    }
+    owner = {
+      Bob = ["~*:^nathan$", "ilike:Dave"]
     }
   }
-  cost_center = {
-    default = "0123456789"
-    allow   = ["~:^[0-9]+$"]
-    remove  = []
-    update  = {}
+}
+```
+
+This ensures that:
+- Firstly, the keys are updated, so we can safely perform the next rules on those keys.
+- Secondly, any missing required tags are added.
+- Thirdly, any tags that are no longer required are removed.
+- Finally, the values are updated as required.
+
+#### Resource-Specific Tag Rules
+
+In addition to defining `base_tag_rules`, you can also provide the same object at a resource level, such as `s3_buckets_tag_rules`. These resource-specific rules will be merged with the `base_tag_rules` to create a comprehensive set of tag rules for each resource.
+
+When merging the `base_tag_rules` with resource-specific rules, the following behaviors apply:
+
+- **Maps** (e.g., `add`, `update_keys`, `update_values`): The maps from the resource-specific rules will be merged with the corresponding maps in the `base_tag_rules`. If a key exists in both the base rules and the resource-specific rules, the value from the resource-specific rules will take precedence.
+- **Lists** (e.g., `remove`, `remove_except`): The lists from both the base and resource-specific rules will be merged/concatenated and then deduplicated to ensure that all unique entries from both lists are included.
+
+Let's say you have base_tag_rules defined as follows:
+
+```hcl
+base_tag_rules = {
+  add = {
+    environment = "unknown"
+    cost_center = "0123456789"
+    owner       = "turbie"
   }
-  owner = {
-    default = "bob"
-    allow   = []
-    remove  = ["default_owner"]
-    update  = {}
+  remove = ["~*:password", "ilike:secret%"]
+  remove_except = []
+  update_keys = {
+    environment = ["env", "ilike:enviro%"]
+    cost_center = ["cc", "~*:^cost_cent(er|re)$", "~*:^costcent(er|re)$"]
+  }
+  update_values = {
+    environment = {
+      production        = ["~*:^prod"]
+      test              = ["~*:^test", "~*:^uat$"]
+      development       = ["~*:^dev"]
+      quality_assurance = ["~*:^qa$", "ilike:%quality%"]
+    }
+    cost_center = {
+      "0123456789" = ["~:[^0-9]"]
+    }
+    owner = {
+      Bob = ["~*:^nathan$", "ilike:Dave"]
+    }
   }
 }
 ```
 
-```sh
-flowpipe pipeline run detect_and_correct_s3_buckets_with_incorrect_tag_values --var-file=values.fpvars
+And you want to apply additional rules to S3 buckets:
+
+```hcl
+s3_bucket_tag_rules = {
+  add = {
+    resource_type = "bucket"
+  }
+  remove = ["ilike:secret%", "~*:key$"]
+  remove_except = []
+  update_keys = {
+    environment = ["~*:^env"]
+    owner       = ["~*:^owner$", "~*:manager$"]
+  }
+  update_values = {
+    owner = {
+      Bob = ["~*:^dave$"]
+    }
+  }
+}
 ```
+
+When merged, the resulting tag rules for S3 buckets will be:
+
+```hcl
+{
+  add = {
+    environment   = "unknown"
+    cost_center   = "0123456789"
+    owner         = "turbie"
+    resource_type = "bucket"
+  }
+  remove = ["~*:password", "ilike:secret%", "~*:key$"]
+  remove_except = []
+  update_keys = {
+    environment = ["~*:^env"]
+    cost_center = ["cc", "~*:^cost_cent(er|re)$", "~*:^costcent(er|re)$"]
+    owner       = ["~*:^owner$", "~*:manager$"]
+  }
+  update_values = {
+    environment = {
+      production        = ["~*:^prod"]
+      test              = ["~*:^test", "~*:^uat$"]
+      development       = ["~*:^dev"]
+      quality_assurance = ["~*:^qa$", "ilike:%quality%"]
+    }
+    cost_center = {
+      "0123456789" = ["~:[^0-9]"]
+    }
+    owner = {
+      Bob = ["~*:^dave$"]
+    }
+  }
+}
+```
+
+In this example:
+
+- The `add` map includes entries from both `base_tag_rules` and `s3_bucket_tag_rules`.
+- The `remove` list is a concatenation of entries from both lists, ensuring no duplicates (`"ilike:secret%"` appears only once).
+- The `remove_except` list remains empty as specified in both rules.
+- The `update_keys` map merges entries, with the resource-specific rules for environment and owner overriding the base rules entirely.
+- The `update_values` map shows that the resource-specific rule for `owner` overrides the base rule for the same key.
+
+By providing resource-specific tag rules, you can customize and extend the base tagging strategy to meet the unique requirements of individual resources, ensuring flexibility and consistency in your tag management.
+
+#### Supported Operators
+
+The below table shows the currently supported operators for pattern-matching.
+
+| Operator | Purpose |
+| -------- | ------- |
+| `=`      | Case-sensitive exact match |
+| `like`   | Case-sensitive pattern matching, where `%` indicates zero or more characters and `_` indicates a single character |
+| `ilike`  | Case-insensitive pattern matching, where `%` indicates zero or more characters and `_` indicates a single character |
+| `~`      | Case-sensitive pattern matching using `regex` patterns. | 
+| `~*`     | Case-insensitive pattern matching using `regex` patterns. | 
+
+If you attempt to use an operator *not* in the table above, the string will be processed as an exact match.
+For example,  `!~:^bob` wouldn't match anything that doesn't begin with `bob`; instead, it would only match if the key/value is exactly `!~:^bob`.
+
+### Running Detect and Correct Pipelines
+
+> Note: Prior to running Detect and Correct pipelines, you should ensure you've [configured](#configuring-tag-rules) your tagging ruleset.
+
+To run your first detection, you'll need to ensure your Steampipe server is up and running:
+
+```sh
+steampipe service start
+```
+
+To find your desired detection, you can filter the `pipeline list` output:
+
+```sh
+flowpipe pipeline list | grep "detect_and_correct"
+```
+
+Then run your chosen pipeline:
+
+```sh
+flowpipe pipeline run detect_and_correct_s3_buckets_with_incorrect_tags
+```
+
+By default the above approach would find the relevant resources and then send a message to your configured [notifier](https://flowpipe.io/docs/reference/config-files/notifier).
+
+However;  you can request via an [Input Step](https://flowpipe.io/docs/build/input) a corrective action to run against each detection result; this behavior is achieved by setting `approvers` either as a variable or for a one-off approach, by passing `approvers` as an argument.
+
+> Note: This approach requires running `flowpipe server` as it uses an `input` step.
+
+```sh
+flowpipe pipeline run detect_and_correct_s3_buckets_with_incorrect_tags --host local --arg='approvers=["default"]'
+```
+
+If you're happy to just apply the same action against all detected items, you can apply them without the `input` step by overriding the `default_action` argument (or the detection specific variable).
+
+```sh
+flowpipe pipeline run detect_and_correct_s3_buckets_with_incorrect_tags --arg='default_action="apply"'
+```
+
+However; if you have configured a non-empty list for your `approvers` variable, you will need to override it as below:
+
+```sh
+flowpipe pipeline run detect_and_correct_s3_buckets_with_incorrect_tags --arg='approvers=[]' --arg='default_action="apply"'
+```
+
+Finally, each detection pipeline has a corresponding [Query Trigger](https://flowpipe.io/docs/flowpipe-hcl/trigger/query), these are disabled by default allowing for you to configure only those which are required, see the [docs](https://hub.flowpipe.io/mods/turbot/aws_tags/triggers) for more information.
 
 ## Open Source & Contributing
 

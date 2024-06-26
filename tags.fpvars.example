@@ -1,6 +1,14 @@
-# Core options
-database           = "postgres:#steampipe@localhost:9193/steampipe"
-notifier           = "default"
-notification_level = "info"
-approvers          = []
-max_concurrency    = 1
+## Core options
+#database           = "postgres:#steampipe@localhost:9193/steampipe"
+#notifier           = "default"
+#notification_level = "info"
+#approvers          = []
+#max_concurrency    = 1
+
+#base_tag_rules = {
+#  add           = {}
+#  remove        = []
+#  remove_except = []
+#  update_keys   = {}
+#  update_values = {}
+#}
