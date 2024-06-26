@@ -1,38 +1,44 @@
-variable "iam_roles_tag_rules" {
-  type = object({
-    add           = optional(map(string))
-    remove        = optional(list(string))
-    remove_except = optional(list(string))
-    update_keys   = optional(map(list(string)))
-    update_values = optional(map(map(list(string))))
-  })
-  description = "" // TODO: Add Description
-}
-
-variable "iam_roles_with_incorrect_tags_trigger_enabled" {
-  type        = bool
-  default     = false
-  description = "If true, the trigger is enabled."
-}
-
-variable "iam_roles_with_incorrect_tags_trigger_schedule" {
-  type        = string
-  default     = "15m"
-  description = "The schedule on which to run the trigger if enabled."
-}
-
 locals {
   iam_roles_tag_rules = {
     add           = merge(local.base_tag_rules.add, try(var.iam_roles_tag_rules.add, {})) 
-    remove        = distinct(concat(local.base_tag_rules.remove, try(var.iam_roles_tag_rules.remove, [])))
-    remove_except = distinct(concat(local.base_tag_rules.remove_except, try(var.iam_roles_tag_rules.remove_except, [])))
+    remove        = distinct(concat(local.base_tag_rules.remove , try(var.iam_roles_tag_rules.remove, [])))
+    remove_except = distinct(concat(local.base_tag_rules.remove_except , try(var.iam_roles_tag_rules.remove_except, [])))
     update_keys   = merge(local.base_tag_rules.update_keys, try(var.iam_roles_tag_rules.update_keys, {}))
     update_values = merge(local.base_tag_rules.update_values, try(var.iam_roles_tag_rules.update_values, {}))
   }
 }
 
 locals {
-  iam_roles_with_incorrect_tags_query = "" // TODO: Add Query Override
+  iam_roles_update_keys_override   = join("\n", flatten([for key, patterns in local.iam_roles_tag_rules.update_keys : [for pattern in patterns : format("      when key %s '%s' then '%s'", (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? element(split(":", pattern), 0) : "="), (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? join(":", slice(split(":", pattern), 1, length(split(":", pattern)))) : pattern), key)]]))
+  iam_roles_remove_override        = join("\n", length(local.iam_roles_tag_rules.remove) == 0 ? ["      when new_key like '%' then false"] : [for pattern in local.iam_roles_tag_rules.remove : format("      when new_key %s '%s' then true", (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? element(split(":", pattern), 0) : "="), (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? join(":", slice(split(":", pattern), 1, length(split(":", pattern)))) : pattern))])
+  iam_roles_remove_except_override = join("\n", length(local.iam_roles_tag_rules.remove_except) == 0 ? ["      when new_key like '%' then true"] : flatten([[for key in keys(merge(local.iam_roles_tag_rules.add, local.iam_roles_tag_rules.update_keys)) : format("      when new_key = '%s' then true", key)], [for pattern in local.iam_roles_tag_rules.remove_except : format("      when new_key %s '%s' then true", (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? element(split(":", pattern), 0) : "="), (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? join(":", slice(split(":", pattern), 1, length(split(":", pattern)))) : pattern))]]))
+  iam_roles_add_override           = join(",\n", length(keys(local.iam_roles_tag_rules.add)) == 0 ? ["      (null, null)"] : [for key, value in local.iam_roles_tag_rules.add : format("      ('%s', '%s')", key, value)])
+  iam_roles_update_values_override = join("\n", flatten([for key, rules in local.iam_roles_tag_rules.update_values : [for new_value, patterns in rules : [for pattern in patterns : format("      when new_key = '%s' and value %s '%s' then '%s'", key, (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? element(split(":", pattern), 0) : "="), (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? join(":", slice(split(":", pattern), 1, length(split(":", pattern)))) : pattern), new_value)]]]))
+}
+
+locals {
+  iam_roles_with_incorrect_tags_query = replace(
+    replace(
+      replace(
+        replace(
+          replace(
+            replace(
+              replace(
+                local.tags_query_template,
+                "__TITLE__", "name"
+              ),
+              "__TABLE_NAME__", "aws_iam_role"
+            ),
+            "__UPDATE_KEYS_OVERRIDE__", local.iam_roles_update_keys_override
+          ),
+          "__REMOVE_OVERRIDE__", local.iam_roles_remove_override
+        ),
+        "__REMOVE_EXCEPT_OVERRIDE__", local.iam_roles_remove_except_override
+      ),
+      "__ADD_OVERRIDE__", local.iam_roles_add_override
+    ),
+    "__UPDATE_VALUES_OVERRIDE__", local.iam_roles_update_values_override
+  )
 }
 
 trigger "query" "detect_and_correct_iam_roles_with_incorrect_tags" {
@@ -105,4 +111,27 @@ pipeline "detect_and_correct_iam_roles_with_incorrect_tags" {
       default_action     = param.default_action
     }
   }
+}
+
+variable "iam_roles_tag_rules" {
+  type = object({
+    add           = optional(map(string))
+    remove        = optional(list(string))
+    remove_except = optional(list(string))
+    update_keys   = optional(map(list(string)))
+    update_values = optional(map(map(list(string))))
+  })
+  description = "" // TODO: Add Description
+}
+
+variable "iam_roles_with_incorrect_tags_trigger_enabled" {
+  type        = bool
+  default     = false
+  description = "If true, the trigger is enabled."
+}
+
+variable "iam_roles_with_incorrect_tags_trigger_schedule" {
+  type        = string
+  default     = "15m"
+  description = "The schedule on which to run the trigger if enabled."
 }
