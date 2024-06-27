@@ -418,49 +418,98 @@ The below table shows the currently supported operators for pattern-matching.
 If you attempt to use an operator *not* in the table above, the string will be processed as an exact match.
 For example,  `!~:^bob` wouldn't match anything that doesn't begin with `bob`; instead, it would only match if the key/value is exactly `!~:^bob`.
 
-### Running Detect and Correct Pipelines
+### Running Pipelines
 
-> Note: Prior to running Detect and Correct pipelines, you should ensure you've [configured](#configuring-tag-rules) your tagging ruleset.
+This mod contains a few different types of pipelines:
+- `detect_and_correct`: these are the core pipelines intended for use, they will utilise [Steampipe](https://steampipe.io) queries to determine amendments to your tags based on the provided ruleset(s).
+- `correct` / `correct_one`: these pipelines are designed to be fed from the `detect_and_correct` pipelines, albeit they've been separated out to allow you to utilise your own detections if desired, this is an advanced use-case however, thus won't be covered in this documentation.
+- Other `utility` type pipelines such as `add_and_remove_resource_tags`, these are designed to be used by other pipelines and should only be called directly if you've read and understood the functionality.
 
-To run your first detection, you'll need to ensure your Steampipe server is up and running:
+Let's begin by looking at how to run a `detect_and_correct` pipeline, assuming you've already followed the [installation instructions](#installation) and [configured tag rules](#configuring-tag-rules) as required
+
+
+Firstly, we need to ensure that [Steampipe](https://steampipe.io) is running in [service mode](https://steampipe.io/docs/managing/service).
 
 ```sh
 steampipe service start
 ```
 
-To find your desired detection, you can filter the `pipeline list` output:
+The pipeline we want to run will be `detect_and_correct_<resource_type>_with_incorrect_tags`, we can find those available by running the following command:
 
 ```sh
 flowpipe pipeline list | grep "detect_and_correct"
 ```
 
-Then run your chosen pipeline:
-
+Then run your chosen pipeline, for example if we wish to remediate tags on our `S3 buckets`:
 ```sh
-flowpipe pipeline run detect_and_correct_s3_buckets_with_incorrect_tags
+flowpipe pipeline run detect_and_correct_s3_buckets_with_incorrect_tags --var-file tags.fpvars
 ```
 
-By default the above approach would find the relevant resources and then send a message to your configured [notifier](https://flowpipe.io/docs/reference/config-files/notifier).
+This will then run the pipeline and depending on your configured running mode; perform the relevant action(s), there are 3 running modes:
+- Notify Only
+- Automatic
+- Wizard
 
-However;  you can request via an [Input Step](https://flowpipe.io/docs/build/input) a corrective action to run against each detection result; this behavior is achieved by setting `approvers` either as a variable or for a one-off approach, by passing `approvers` as an argument.
+#### Notify Only
+This is the default `out-of-the-box` behavior, requiring no additional configuration. 
 
-> Note: This approach requires running `flowpipe server` as it uses an `input` step.
+As the name implies, this mode is designed to send a message on your configured [notifier](https://flowpipe.io/docs/reference/config-files/notifier) for each resource that violated a tagging rule along with the suggested remedial action.
 
-```sh
-flowpipe pipeline run detect_and_correct_s3_buckets_with_incorrect_tags --host local --arg='approvers=["default"]'
+#### Automatic
+This behavior allows for a hands-off approach to remediating (or ignoring) your tagging ruleset violations.
+
+To run in automatic mode, you can either change the `incorrect_tags_default_action` variable
+
+```hcl
+# tags.fpvars
+incorrect_tags_default_action = "apply"
+base_tag_rules = ... # omitted for brevity
 ```
 
-If you're happy to just apply the same action against all detected items, you can apply them without the `input` step by overriding the `default_action` argument (or the detection specific variable).
+or pass the `default_action` argument on the command-line
 
 ```sh
-flowpipe pipeline run detect_and_correct_s3_buckets_with_incorrect_tags --arg='default_action="apply"'
+flowpipe pipeline run detect_and_correct_s3_buckets_with_incorrect_tags --var-file tags.fpvars --arg='default_action=apply'
 ```
 
-However; if you have configured a non-empty list for your `approvers` variable, you will need to override it as below:
+Valid values are:
+- `notify`: This is the default value and is actually [notify only](#notify-only) mode.
+- `skip`: This will ignore any detections and not perform any other remediative action.
+- `apply`: This will automatically apply the remediative actions to your resources.
 
+#### Wizard
+If you prefer a more hands-on approach to approving changes to your resources tags, you can this running mode.
+
+> Note: At the current time, wizard mode requires running flowpipe [server](https://flowpipe.io/docs/run/server) due to usage of an [input step](https://flowpipe.io/docs/build/input).
+
+In order to use this approach, you will be required to configure `approvers`, these are a special [notifier](https://flowpipe.io/docs/reference/config-files/notifier) that is used to receive and respond to [input steps](https://flowpipe.io/docs/build/input).
+
+This can be done prior to starting the Flowpipe [server](https://flowpipe.io/docs/run/server) in the `fpvars` file with your rules.
+
+```hcl
+# tags.fpvars
+approvers = ["http"]
+base_tag_rules = ... # omitted for brevity
+```
+
+Launch the server:
 ```sh
-flowpipe pipeline run detect_and_correct_s3_buckets_with_incorrect_tags --arg='approvers=[]' --arg='default_action="apply"'
+flowpipe pipeline server --vars-file tags.fpvars
 ```
+
+Run the pipeline:
+```sh
+flowpipe pipeline run detect_and_correct_s3_buckets_with_incorrect_tags --host local
+```
+
+Alternatively you can pass `approvers` as an arg when calling pipeline run against the server, this will act as an override.
+```sh
+flowpipe pipeline run detect_and_correct_s3_buckets_with_incorrect_tags --host local --arg='approvers=["http"]'
+```
+
+### Running Query Triggers
+
+> TODO: Replace below with actual useful documentation
 
 Finally, each detection pipeline has a corresponding [Query Trigger](https://flowpipe.io/docs/flowpipe-hcl/trigger/query), these are disabled by default allowing for you to configure only those which are required, see the [docs](https://hub.flowpipe.io/mods/turbot/aws_tags/triggers) for more information.
 
