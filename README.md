@@ -14,7 +14,7 @@ Docker daemon must be installed and running. Please see [Install Docker Engine](
 
 ### Installation
 
-Download and install Flowpipe (https://flowpipe.io/downloads) and Steampipe (https://steampipe.io/downloads). Or use Brew:
+Download and install [Flowpipe](https://flowpipe.io/downloads) and [Steampipe](https://steampipe.io/downloads). Or use Brew:
 
 ```sh
 brew install turbot/tap/flowpipe
@@ -29,7 +29,7 @@ steampipe plugin install aws
 
 Steampipe will automatically use your default AWS credentials. Optionally, you can [setup multiple accounts](https://hub.steampipe.io/plugins/turbot/aws#multi-account-connections) or [customize AWS credentials](https://hub.steampipe.io/plugins/turbot/aws#configuring-aws-credentials).
 
-Create a `credential_import` resource to import your Steampipe AWS connections:
+Create a [`credential_import`](https://flowpipe.io/docs/reference/config-files/credential_import) resource to import your Steampipe AWS connections:
 
 ```sh
 vi ~/.flowpipe/config/aws.fpc
@@ -41,8 +41,6 @@ credential_import "aws" {
   connections = ["*"]
 }
 ```
-
-For more information on importing credentials, please see [Credential Import](https://flowpipe.io/docs/reference/config-files/credential_import).
 
 For more information on credentials in Flowpipe, please see [Managing Credentials](https://flowpipe.io/docs/run/credentials).
 
@@ -91,7 +89,9 @@ variable "base_tag_rules" {
 
 #### Add: Ensuring Resources Have Mandatory Tags
 
-If you require all your resources to have at least `environment` and `owner` tags, you can use the `add` attribute to apply these tags to resources that currently do not have the specific tag along with a default value.
+If you require all your resources to have a set of predefined tags, you can use the `add` attribute to apply these tags to resources that currently do not have the desired tags, along with a default value.
+
+Let's say we want to ensure every resource has the `environment` and `owner` tags. We could write this rule as:
 
 ```hcl
 base_tag_rules = {
@@ -102,13 +102,13 @@ base_tag_rules = {
 }
 ```
 
-In this example, the map key is the tag you want to ensure exists on your resources, and the value is the default value to apply.
+Here, the map key is the tag you want to ensure exists on your resources, and the value is the default value to apply.
 
 #### Remove: Ensuring Resources Don't Have Prohibited Tags 
 
 Over time, tags can accumulate on your resources for various reasons. You can use the `remove` attribute to clean up tags that are no longer wanted or allowed from your resources.
 
-The example below shows how to remove any tags from our resources that are `password`, `secret` or `key`.
+If we wanted to ensure that we didn't include `password`, `secret` or `key` tags on our resources, we could write this rule as:
 
 ```hcl
 base_tag_rules = {
@@ -116,11 +116,9 @@ base_tag_rules = {
 }
 ```
 
-However, the above example only caters to exact matches on those strings. Since keys in AWS are case-insensitive, we might miss tags like `Password` or `ssh_key` as these aren't exact matches.
+However, the above will only cater to exact matches on those strings. This means we may miss tags like `Password` or `ssh_key` as these tags are in a different casing or contain extraneous characters. To achieve better matching we can use patterns along with [supported operators](#supported-operators) in the format `operator:pattern`.
 
-To achieve these kinds of matches, we support an `operator:pattern` syntax which takes a PostgreSQL operator and a pattern separated by a `:`. For more information on these see the [Supported Operators](#supported-operators) section. 
-
-A more realistic approach would be to remove tags which contains `password`, begins with `secret` or ends with `key`, and these should all be case-insensitive matches. This would look like the example below.
+This would allow us to write rules which match more realistic cirumstances and remove tags that contain `password`, begin with `secret`, or end with `key` regardless of the casing.
 
 ```hcl
 base_tag_rules = {
@@ -128,13 +126,13 @@ base_tag_rules = {
 }
 ```
 
-Any tags which do not match one of the patterns in the list will be retained.
+This allows us to remove any tags which match any of the defined patterns.
 
 #### Remove Except: Ensuring Resources Only Have Permitted Tags
 
-Another approach to cleaning up your tags is to ensure that you only have those that are desired or permitted and that all others are removed. You can use the `remove_except` attribute to define a list of patterns for retaining matching tags, where all other tags are removed.
+Another approach to cleaning up your tags is to ensure that you only keep those that are desired or permitted and remove all others. You can use the `remove_except` attribute to define a list of patterns for retaining matching tags, while all other tags are removed.
 
-As this is the inverse behavior of `remove`, it is recommended that you only use one of these attributes to avoid conflicts. Both follow the same `operator:pattern` matching behavior.
+Since this is the inverse behavior of `remove`, it's best to use one or the other to avoid conflicts. Both follow the same `operator:pattern` matching behavior.
 
 Lets say we want to ensure our resources **only** have the following tags:
 - `environment`
@@ -142,7 +140,7 @@ Lets say we want to ensure our resources **only** have the following tags:
 - `cost_center`
 - Any that are prefixed with our company name `turbot`
 
-This would look like the following example:
+We can write this rule as:
 
 ```hcl
 base_tag_rules = {
@@ -154,15 +152,15 @@ Any tags which do not match one of the above patterns will be removed from the r
 
 #### Update Keys: Ensuring Tag Keys Are Standardized
 
-Over time your tagging standards may change or you may have variants of the same tag that you wish to standardize, you can use the `update_keys` attribute to reconcile tags to a standardized set.
+Over time your tagging standards may change, or you may have variants of the same tag that you wish to standardize. You can use the `update_keys` attribute to reconcile tags to a standardized set.
 
-For example, we may have want to consolidate tags for `environment` and `cost_center` where we've previously used shorthand tags for our standard (`env` and `cc`), as well as remediate common spelling errors such as `enviroment` or `cost_centre`.
+Previously, we may have used shorthand tags like `env` or `cc` which we want to reconcile to our new standard `environment` and `cost_center`. We may also have encountered common spelling errors such as `enviroment` or `cost_centre`. To standardize these tags, we can write the rule as:
 
 ```hcl
 base_tag_rules = {
   update_keys = {
     environment = ["env", "ilike:enviro%"]
-    cost_center = ["cc", "~*:^cost_cent(er|re)$", "~*:^costcent(er|re)$"]
+    cost_center = ["~*:^cc$", "~*:^cost_cent(er|re)$", "~*:^costcent(er|re)$"]
   }
 }
 ```
@@ -171,14 +169,16 @@ Behind the scenes, this works by creating a new tag with the value of existing m
 
 #### Update Values: Ensuring Tag Values Are Standardized
 
-Similarly to keys, you may want to change the standards of the values over time or correct common typos. You can use the `update_values` attribute to reconcile values to expected standards.
+Just like keys, you may want to standardize the values over time or correct common typos. You can use the `update_values` attribute to reconcile values to expected standards.
 
-This works in a similar way to `update_keys` except that there is an extra layer of nesting to group the updates on a per-key basis.
+This works in a similar way to `update_keys` but has an extra layer of nesting to group the updates on a per-key basis. The outer map key is the tag key, the inner map key is the new value, and the patterns are used for matching the existing values.
 
-For example, lets say that you want to ensure the following happens:
-- For `environment` tag, any previous shorthand or aliases are standardized into the long version of the name as the new standard.
-- For `cost_center` tag, any values which have non-numeric characters are replaced by your default cost center.
-- For `owner` tag, anything previously held by `Nathan` or `Dave` is now owned by `Bob`.
+Previously, we may have used shorthand or aliases for tag values that we now want to standardize. For instance:
+- For the `environment` tag, any previous shorthand or aliases should be standardized to the full names.
+- For the `cost_center` tag, any values containing non-numeric characters should be replaced by a default cost center.
+- For the `owner` tag, any resources previously owned by _Nathan_ or _Dave_ should now be owned by _Bob_.
+
+Let's write these rules as follows:
 
 ```hcl
 base_tag_rules = {
@@ -187,7 +187,7 @@ base_tag_rules = {
       production        = ["~*:^prod"]
       test              = ["~*:^test", "~*:^uat$"]
       development       = ["~*:^dev"]
-      quality_assurance = ["~*:^qa$", "ilike:%quality%"]
+      quality_assurance = ["~*:^qa$", "ilike:%qual%"]
     }
     cost_center = {
       "0123456789" = ["~:[^0-9]"]
@@ -199,7 +199,38 @@ base_tag_rules = {
 }
 ```
 
-<!-- TODO: Add documentation about `default` for non-matching values if we get this in. -->
+Additionally, for a given key we can specify a default to use for the tags value when no other patterns match using a special `else:` operator. This is especially useful when you want to ensure that all values are updated to a standard without knowing all potential matches.
+
+Let's say that we want any `environment` with a value not matching our patterns for `production`, `development` or `quality_assurance` to default to `test`. We could rewrite our rule as below:
+
+```hcl
+base_tag_rules = {
+  update_values = {
+    environment = {
+      production        = ["~*:^prod"]
+      test              = ["else:"]
+      development       = ["~*:^dev"]
+      quality_assurance = ["~*:^qa$", "ilike:%qual%"]
+    }
+    cost_center = {
+      "0123456789" = ["~:[^0-9]"]
+    }
+    owner = {
+      Bob = ["~*:^nathan$", "ilike:Dave"]
+    }
+  }
+}
+```
+
+> Note: Whilst it is possible to have multiple `else:` patterns declared for any given tag, only the one with the first alphabetically sorted value (inner map key) will be used.
+
+In this configuration:
+
+- The `environment` tag values like `prod`, `qa`, and `dev` will be standardized to `production`, `quality_assurance`, and `development`, respectively. Any unmatched values will default to `test`.
+- The `cost_center` tag values that contain non-numeric characters will be replaced with `0123456789`.
+The `owner` tag values `Nathan` and `Dave` will be changed to `Bob`.
+
+This approach ensures that all your tag values are consistently updated, even when new or unexpected values are encountered.
 
 #### Complete Tag Rules
 
@@ -210,7 +241,7 @@ Now that you understand each of the attributes available in the `base_tag_rules`
 > Ideally, you should use either the `remove` or the `remove_except` attribute, but not both simultaneously. This ensures clarity in your tag removal logic and avoids potential conflicts.
 >
 > - `remove`: Use this to specify patterns of tags you want to explicitly remove.
->- `remove_except`: Use this to specify patterns of tags you want to retain, removing all others.
+> - `remove_except`: Use this to specify patterns of tags you want to retain, removing all others.
 
 When using a combination of attributes to build a complex ruleset, they will be executed in the following order to ensure logical application of the rules:
 
@@ -263,7 +294,11 @@ This ensures that:
 
 #### Resource-Specific Tag Rules
 
-In addition to defining `base_tag_rules`, you can also provide the same object at a resource level, such as `s3_buckets_tag_rules`. These resource-specific rules will be merged with the `base_tag_rules` to create a comprehensive set of tag rules for each resource.
+You have three options for defining tag rules:
+
+1. Only provide `base_tag_rules`: Apply the same rules to every resource.
+2. Omit `base_tag_rules` and only provide resource-specific rules (e.g. `s3_buckets_tag_rules`): Allow for custom rules per resource.
+3. Provide both `base_tag_rules` and resource-specific rules: Merge the rules to create a comprehensive ruleset.
 
 When merging the `base_tag_rules` with resource-specific rules, the following behaviors apply:
 
@@ -374,10 +409,11 @@ The below table shows the currently supported operators for pattern-matching.
 | Operator | Purpose |
 | -------- | ------- |
 | `=`      | Case-sensitive exact match |
-| `like`   | Case-sensitive pattern matching, where `%` indicates zero or more characters and `_` indicates a single character |
-| `ilike`  | Case-insensitive pattern matching, where `%` indicates zero or more characters and `_` indicates a single character |
+| `like`   | Case-sensitive pattern matching, where `%` indicates zero or more characters and `_` indicates a single character. |
+| `ilike`  | Case-insensitive pattern matching, where `%` indicates zero or more characters and `_` indicates a single character. |
 | `~`      | Case-sensitive pattern matching using `regex` patterns. | 
 | `~*`     | Case-insensitive pattern matching using `regex` patterns. | 
+| `else:`  | _Special Operator_ only supported in `update_values` to indicate that this value should be used as replacement value if no other pattern is matched. The whole value must be an _exact match_ of `else:` with no trailing information. |
 
 If you attempt to use an operator *not* in the table above, the string will be processed as an exact match.
 For example,  `!~:^bob` wouldn't match anything that doesn't begin with `bob`; instead, it would only match if the key/value is exactly `!~:^bob`.
