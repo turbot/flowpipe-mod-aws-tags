@@ -40,31 +40,7 @@ variable "base_tag_rules" {
     remove        = optional(list(string))
     remove_except = optional(list(string))
     update_keys   = optional(map(list(string)))
-    update_values = optional(map(map(list(string)))) // TODO: list(string) -> any and coerce for the `default` non-matching others approach
+    update_values = optional(map(map(list(string))))
   })
   description = "" // TODO: Add Description
 }
-
-// variable "incorrect_tag_keys_default_action" {
-//   type        = string
-//   description = "The default action to take when no approvers are specified."
-//   default     = "notify"
-// }
-
-// variable "incorrect_tag_keys_enabled_actions" {
-//   type        = list(string)
-//   description = "List of enabled actions to take when a detection is triggered."
-//   default     = ["skip", "apply"]
-// }
-
-// variable "incorrect_tag_values_default_action" {
-//   type        = string
-//   description = "The default action to take when no approvers are specified."
-//   default     = "notify"
-// }
-
-// variable "incorrect_tag_values_enabled_actions" {
-//   type        = list(string)
-//   description = "List of enabled actions to take when a detection is triggered."
-//   default     = ["skip", "apply"]
-// }
