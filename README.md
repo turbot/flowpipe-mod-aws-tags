@@ -69,7 +69,7 @@ cp tags.fpvars.example tags.fpvars
 vi tags.fpvars
 ```
 
-> TODO: Docs on the core variables: database, approvers, etc.
+> TODO: Docs on the core variables: database, approvers, etc. (Explain here OR link to Hub?)
 
 ### Configuring Tag Rules
 
@@ -176,7 +176,7 @@ This works in a similar way to `update_keys` but has an extra layer of nesting t
 Previously, we may have used shorthand or aliases for tag values that we now want to standardize. For instance:
 - For the `environment` tag, any previous shorthand or aliases should be standardized to the full names.
 - For the `cost_center` tag, any values containing non-numeric characters should be replaced by a default cost center.
-- For the `owner` tag, any resources previously owned by _Nathan_ or _Dave_ should now be owned by _Bob_.
+- For the `owner` tag, any resources previously owned by _nathan_ or _Dave_ should now be owned by _bob_.
 
 Let's write these rules as follows:
 
@@ -186,14 +186,14 @@ base_tag_rules = {
     environment = {
       production        = ["~*:^prod"]
       test              = ["~*:^test", "~*:^uat$"]
-      development       = ["~*:^dev"]
       quality_assurance = ["~*:^qa$", "ilike:%qual%"]
+      development       = ["~*:^dev"]
     }
     cost_center = {
       "0123456789" = ["~:[^0-9]"]
     }
     owner = {
-      Bob = ["~*:^nathan$", "ilike:Dave"]
+      bob = ["~*:^nathan$", "ilike:Dave"]
     }
   }
 }
@@ -201,22 +201,22 @@ base_tag_rules = {
 
 Additionally, for a given key we can specify a default to use for the tags value when no other patterns match using a special `else:` operator. This is especially useful when you want to ensure that all values are updated to a standard without knowing all potential matches.
 
-Let's say that we want any `environment` with a value not matching our patterns for `production`, `development` or `quality_assurance` to default to `test`. We could rewrite our rule as below:
+Let's say that we want any `environment` with a value not matching our patterns for `production`, `test` or `quality_assurance` to default to `development`. We could rewrite our rule as below:
 
 ```hcl
 base_tag_rules = {
   update_values = {
     environment = {
       production        = ["~*:^prod"]
-      test              = ["else:"]
-      development       = ["~*:^dev"]
+      test              = ["~*:^test", "~*:^uat$"]
       quality_assurance = ["~*:^qa$", "ilike:%qual%"]
+      development       = ["else:"]
     }
     cost_center = {
       "0123456789" = ["~:[^0-9]"]
     }
     owner = {
-      Bob = ["~*:^nathan$", "ilike:Dave"]
+      bob = ["~*:^nathan$", "ilike:Dave"]
     }
   }
 }
@@ -226,9 +226,9 @@ base_tag_rules = {
 
 In this configuration:
 
-- The `environment` tag values like `prod`, `qa`, and `dev` will be standardized to `production`, `quality_assurance`, and `development`, respectively. Any unmatched values will default to `test`.
+- The `environment` tag values like `prod`, `qa`, and `uat` will be standardized to `production`, `quality_assurance`, and `test`, respectively. Any unmatched values will default to `development`.
 - The `cost_center` tag values that contain non-numeric characters will be replaced with `0123456789`.
-The `owner` tag values `Nathan` and `Dave` will be changed to `Bob`.
+- The `owner` tag values `Nathan` and `Dave` will be changed to `bob`.
 
 This approach ensures that all your tag values are consistently updated, even when new or unexpected values are encountered.
 
@@ -280,7 +280,7 @@ base_tag_rules = {
       "0123456789" = ["~:[^0-9]"]
     }
     owner = {
-      Bob = ["~*:^nathan$", "ilike:Dave"]
+      bob = ["~*:^nathan$", "ilike:Dave"]
     }
   }
 }
@@ -331,7 +331,7 @@ base_tag_rules = {
       "0123456789" = ["~:[^0-9]"]
     }
     owner = {
-      Bob = ["~*:^nathan$", "ilike:Dave"]
+      bob = ["~*:^nathan$", "ilike:Dave"]
     }
   }
 }
@@ -352,7 +352,7 @@ s3_bucket_tag_rules = {
   }
   update_values = {
     owner = {
-      Bob = ["~*:^dave$"]
+      bob = ["~*:^dave$"]
     }
   }
 }
@@ -386,7 +386,7 @@ When merged, the resulting tag rules for S3 buckets will be:
       "0123456789" = ["~:[^0-9]"]
     }
     owner = {
-      Bob = ["~*:^dave$"]
+      bob = ["~*:^dave$"]
     }
   }
 }
@@ -466,7 +466,7 @@ incorrect_tags_default_action = "apply"
 base_tag_rules = ... # omitted for brevity
 ```
 
-or pass the `default_action` argument on the command-line
+or pass the `default_action` argument on the command-line.
 
 ```sh
 flowpipe pipeline run detect_and_correct_s3_buckets_with_incorrect_tags --var-file tags.fpvars --arg='default_action=apply'
@@ -476,6 +476,8 @@ Valid values are:
 - `notify`: This is the default value and is actually [notify only](#notify-only) mode.
 - `skip`: This will ignore any detections and not perform any other remediative action.
 - `apply`: This will automatically apply the remediative actions to your resources.
+
+To further enhance this approach, you can enable the pipelines corresponding [query trigger](#running-query-triggers) to run completely hands-off.
 
 #### Wizard
 If you prefer a more hands-on approach to approving changes to your resources tags, you can this running mode.
@@ -509,9 +511,37 @@ flowpipe pipeline run detect_and_correct_s3_buckets_with_incorrect_tags --host l
 
 ### Running Query Triggers
 
-> TODO: Replace below with actual useful documentation
+> Note: Query triggers require Flowpipe running in [server](https://flowpipe.io/docs/run/server) mode.
 
-Finally, each detection pipeline has a corresponding [Query Trigger](https://flowpipe.io/docs/flowpipe-hcl/trigger/query), these are disabled by default allowing for you to configure only those which are required, see the [docs](https://hub.flowpipe.io/mods/turbot/aws_tags/triggers) for more information.
+Each `detect_and_correct` pipeline comes with a corresponding [Query Trigger](https://flowpipe.io/docs/flowpipe-hcl/trigger/query), these are _disabled_ by default allowing for you to _enable_ and _schedule_ them as desired.
+
+Let's begin by looking at how to set-up a Query Trigger to automatically resolve tagging violations with our S3 Buckets.
+
+Firsty, we need to update our `tags.fpvars` file to add or update the following variables - if we want to run our remediation `hourly` and automatically `apply` the corrections:
+
+```hcl
+# tags.fpvars
+
+s3_buckets_with_incorrect_tags_trigger_enabled   = true
+s3_buckets_with_incorrect_tags_trigger_scheduled = "1h"
+incorrect_tags_default_action                    = "apply"
+
+base_tag_rules = ... # omitted for brevity
+```
+
+Now we'll need to start up our Flowpipe server:
+
+```sh
+flowpipe server --var-file=tags.fpvars
+```
+
+This will activate every hour and detect S3 buckets with tagging violations and apply the corrections without further interaction!
+
+#### Detection Differences: Query Trigger vs Pipeline
+
+When running the `detect_and_correct` paths, there is a key difference in the detections returned when using a query trigger vs calling the pipeline.
+
+This is due to the query trigger caching the result set, therefore once a resource has been detected, if it is skipped it will not be returned in future detections until the query trigger cache is cleared or the resource is removed by a run of the query trigger where the result is ok.
 
 ## Open Source & Contributing
 
