@@ -79,6 +79,7 @@ variable "iam_roles_tag_rules" {
     update_values = optional(map(map(list(string))))
   })
   description = "IAM Role specific tag rules"
+  default     = null
 }
 
 variable "iam_roles_with_incorrect_tags_trigger_enabled" {

@@ -79,6 +79,7 @@ variable "s3_buckets_tag_rules" {
     update_values = optional(map(map(list(string))))
   })
   description = "S3 Bucket specific tag rules"
+  default     = null
 }
 
 variable "s3_buckets_with_incorrect_tags_trigger_enabled" {
