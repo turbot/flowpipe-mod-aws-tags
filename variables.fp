@@ -43,4 +43,11 @@ variable "base_tag_rules" {
     update_values = optional(map(map(list(string))))
   })
   description = "" // TODO: Add Description
+  default = {
+    add           = {}
+    remove        = []
+    remove_except = []
+    update_keys   = {}
+    update_values = {}
+  }
 }
