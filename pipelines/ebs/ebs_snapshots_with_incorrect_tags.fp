@@ -1,8 +1,7 @@
 trigger "query" "detect_and_correct_ebs_snapshots_with_incorrect_tags" {
   title         = "Detect & correct EBS snapshots with incorrect tags"
   description   = "Detects EBS snapshots with incorrect tags and optionally attempts to correct them."
-  // documentation = "" // TODO: Add documentation
-  tags          = merge(local.ebs_common_tags, { })
+  tags          = local.ebs_common_tags
 
   enabled  = var.ebs_snapshots_with_incorrect_tags_trigger_enabled
   schedule = var.ebs_snapshots_with_incorrect_tags_trigger_schedule
@@ -20,7 +19,6 @@ trigger "query" "detect_and_correct_ebs_snapshots_with_incorrect_tags" {
 pipeline "detect_and_correct_ebs_snapshots_with_incorrect_tags" {
   title         = "Detect & correct EBS snapshots with incorrect tags"
   description   = "Detects EBS snapshots with incorrect tags and optionally attempts to correct them."
-  // documentation = "" // TODO: Add documentation
   tags          = merge(local.ebs_common_tags, { type = "featured" })
 
   param "database" {

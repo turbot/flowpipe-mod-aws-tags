@@ -1,8 +1,7 @@
 trigger "query" "detect_and_correct_iam_roles_with_incorrect_tags" {
   title         = "Detect & correct IAM roles with incorrect tags"
   description   = "Detects IAM roles with incorrect tags and optionally attempts to correct them."
-  // documentation = "" // TODO: Add documentation
-  tags          = merge(local.iam_common_tags, { })
+  tags          = local.iam_common_tags
 
   enabled  = var.iam_roles_with_incorrect_tags_trigger_enabled
   schedule = var.iam_roles_with_incorrect_tags_trigger_schedule
@@ -20,7 +19,6 @@ trigger "query" "detect_and_correct_iam_roles_with_incorrect_tags" {
 pipeline "detect_and_correct_iam_roles_with_incorrect_tags" {
   title         = "Detect & correct IAM roles with incorrect tags"
   description   = "Detects IAM roles with incorrect tags and optionally attempts to correct them."
-  // documentation = "" // TODO: Add documentation
   tags          = merge(local.iam_common_tags, { type = "featured" })
 
   param "database" {

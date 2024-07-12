@@ -1,8 +1,7 @@
 trigger "query" "detect_and_correct_iam_server_certificates_with_incorrect_tags" {
   title         = "Detect & correct IAM server certificates with incorrect tags"
   description   = "Detects IAM server certificates with incorrect tags and optionally attempts to correct them."
-  // documentation = "" // TODO: Add documentation
-  tags          = merge(local.iam_common_tags, { })
+  tags          = local.iam_common_tags
 
   enabled  = var.iam_server_certificates_with_incorrect_tags_trigger_enabled
   schedule = var.iam_server_certificates_with_incorrect_tags_trigger_schedule
@@ -20,7 +19,6 @@ trigger "query" "detect_and_correct_iam_server_certificates_with_incorrect_tags"
 pipeline "detect_and_correct_iam_server_certificates_with_incorrect_tags" {
   title         = "Detect & correct IAM server certificates with incorrect tags"
   description   = "Detects IAM server certificates with incorrect tags and optionally attempts to correct them."
-  // documentation = "" // TODO: Add documentation
   tags          = merge(local.iam_common_tags, { type = "featured" })
 
   param "database" {

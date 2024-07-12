@@ -1,8 +1,7 @@
 trigger "query" "detect_and_correct_s3_buckets_with_incorrect_tags" {
   title         = "Detect & correct S3 buckets with incorrect tags"
   description   = "Detects S3 buckets with incorrect tags and optionally attempts to correct them."
-  // documentation = "" // TODO: Add documentation
-  tags          = merge(local.s3_common_tags, { })
+  tags          = local.s3_common_tags
 
   enabled  = var.s3_buckets_with_incorrect_tags_trigger_enabled
   schedule = var.s3_buckets_with_incorrect_tags_trigger_schedule
@@ -20,7 +19,6 @@ trigger "query" "detect_and_correct_s3_buckets_with_incorrect_tags" {
 pipeline "detect_and_correct_s3_buckets_with_incorrect_tags" {
   title         = "Detect & correct S3 buckets with incorrect tags"
   description   = "Detects S3 buckets with incorrect tags and optionally attempts to correct them."
-  // documentation = "" // TODO: Add documentation
   tags          = merge(local.s3_common_tags, { type = "featured" })
 
   param "database" {
