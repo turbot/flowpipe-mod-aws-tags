@@ -60,7 +60,7 @@ flowpipe mod install
 
 ### Configuration
 
-To start using this mod, you need to configure some [input variables](https://flowpipe.io/docs/build/mod-variables#input-variables).
+To start using this mod, you may need to configure some [input variables](https://flowpipe.io/docs/build/mod-variables#input-variables).
 
 The simplest way to do this is to copy the example file `tags.fpvars.example` to `tags.fpvars`, and then update the values as needed. Alternatively, you can pass the variables directly via the command line or environment variables. For more details on these methods, see [passing input variables](https://flowpipe.io/docs/build/mod-variables#passing-input-variables).
 
@@ -69,7 +69,7 @@ cp tags.fpvars.example tags.fpvars
 vi tags.fpvars
 ```
 
-> TODO: Docs on the core variables: database, approvers, etc. (Explain here OR link to Hub?)
+Whilst most [variables](https://hub.flowpipe.io/mods/turbot/aws_tags/variables) are set with sensible defaults, you will need to specify your own tagging rules either as a [base ruleset](#configuring-tag-rules), [resource-specific ruleset](#resource-specific-tag-rules) or a combination of both.
 
 ### Configuring Tag Rules
 
@@ -458,7 +458,7 @@ As the name implies, this mode is designed to send a message on your configured 
 #### Automatic
 This behavior allows for a hands-off approach to remediating (or ignoring) your tagging ruleset violations.
 
-To run in automatic mode, you can either change the `incorrect_tags_default_action` variable
+To run in automatic mode, you can either change the `incorrect_tags_default_action` variable from `notify` to either `skip` or `apply` in your fpvars file
 
 ```hcl
 # tags.fpvars
@@ -480,34 +480,25 @@ Valid values are:
 To further enhance this approach, you can enable the pipelines corresponding [query trigger](#running-query-triggers) to run completely hands-off.
 
 #### Wizard
-If you prefer a more hands-on approach to approving changes to your resources tags, you can this running mode.
+If you prefer a more hands-on approach to approving changes to your resources tags, you can run in wizard mode, which will prompt you for input on each resource detected that violates your ruleset.
 
-> Note: At the current time, wizard mode requires running flowpipe [server](https://flowpipe.io/docs/run/server) due to usage of an [input step](https://flowpipe.io/docs/build/input).
-
-In order to use this approach, you will be required to configure `approvers`, these are a special [notifier](https://flowpipe.io/docs/reference/config-files/notifier) that is used to receive and respond to [input steps](https://flowpipe.io/docs/build/input).
-
-This can be done prior to starting the Flowpipe [server](https://flowpipe.io/docs/run/server) in the `fpvars` file with your rules.
+To run in wizard mode, you can either set the `approvers` variable in your `fpvars` file
 
 ```hcl
 # tags.fpvars
-approvers = ["http"]
+approvers = ["default"]
 base_tag_rules = ... # omitted for brevity
 ```
 
-Launch the server:
+or pass the `approvers` argument on the command-line.
+
 ```sh
-flowpipe pipeline server --vars-file tags.fpvars
+flowpipe pipeline run detect_and_correct_s3_buckets_with_incorrect_tags --var-file tags.fpvars --arg='approvers=["default"]'
 ```
 
-Run the pipeline:
-```sh
-flowpipe pipeline run detect_and_correct_s3_buckets_with_incorrect_tags --host local
-```
+This will run the pipeline locally, prompting you directly in the terminal to select the action for each detected resource.
 
-Alternatively you can pass `approvers` as an arg when calling pipeline run against the server, this will act as an override.
-```sh
-flowpipe pipeline run detect_and_correct_s3_buckets_with_incorrect_tags --host local --arg='approvers=["http"]'
-```
+You can combine this approch using Flowpipe [server](https://flowpipe.io/docs/run/server) and [external integrations](https://flowpipe.io/docs/build/input) to prompt in `http`, `slack`, `teams`, etc.
 
 ### Running Query Triggers
 

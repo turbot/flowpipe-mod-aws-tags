@@ -42,12 +42,5 @@ variable "base_tag_rules" {
     update_keys   = optional(map(list(string)))
     update_values = optional(map(map(list(string))))
   })
-  description = "" // TODO: Add Description
-  default = {
-    add           = {}
-    remove        = []
-    remove_except = []
-    update_keys   = {}
-    update_values = {}
-  }
+  description = "Base rules to apply to resources unless overridden when merged with any provided resource-specific rules."
 }
