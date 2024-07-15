@@ -69,7 +69,7 @@ cp tags.fpvars.example tags.fpvars
 vi tags.fpvars
 ```
 
-Whilst most [variables](https://hub.flowpipe.io/mods/turbot/aws_tags/variables)
+Whilst most [variables](https://hub.flowpipe.io/mods/turbot/aws_tags/variables) are set with sensible defaults, you will need to specify your own tagging rules either as a [base ruleset](#configuring-tag-rules), [resource-specific ruleset](#resource-specific-tag-rules) or a combination of both.
 
 ### Configuring Tag Rules
 
