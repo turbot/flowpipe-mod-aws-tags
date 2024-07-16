@@ -76,7 +76,7 @@ variable "route53_domains_tag_rules" {
     update_keys   = optional(map(list(string)))
     update_values = optional(map(map(list(string))))
   })
-  description = "Route53 Bucket specific tag rules"
+  description = "Route53 domain specific tag rules"
   default     = null
 }
 

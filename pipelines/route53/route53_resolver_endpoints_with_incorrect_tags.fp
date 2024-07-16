@@ -76,7 +76,7 @@ variable "route53_resolver_endpoints_tag_rules" {
     update_keys   = optional(map(list(string)))
     update_values = optional(map(map(list(string))))
   })
-  description = "Route53 Bucket specific tag rules"
+  description = "Route53 resolver endpoint specific tag rules"
   default     = null
 }
 
