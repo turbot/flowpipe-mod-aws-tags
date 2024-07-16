@@ -28,6 +28,7 @@ pipeline "add_and_remove_resource_tags" {
   }
 
   step "pipeline" "add_or_update" {
+    if       = length(param.add) > 0
     pipeline = local.aws_pipeline_tag_resources
     args     = {
       cred          = param.cred
@@ -38,6 +39,7 @@ pipeline "add_and_remove_resource_tags" {
   }
 
   step "pipeline" "remove" {
+    if         = length(param.remove) > 0
     depends_on = [step.pipeline.add_or_update]
     pipeline   = local.aws_pipeline_untag_resources
     args       = {
