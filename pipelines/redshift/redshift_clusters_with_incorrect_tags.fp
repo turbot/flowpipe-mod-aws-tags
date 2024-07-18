@@ -1,7 +1,7 @@
 trigger "query" "detect_and_correct_redshift_clusters_with_incorrect_tags" {
-  title         = "Detect & correct Redshift clusters with incorrect tags"
-  description   = "Detects Redshift clusters with incorrect tags and optionally attempts to correct them."
-  tags          = local.redshift_common_tags
+  title       = "Detect & correct Redshift clusters with incorrect tags"
+  description = "Detects Redshift clusters with incorrect tags and optionally attempts to correct them."
+  tags        = local.redshift_common_tags
 
   enabled  = var.redshift_clusters_with_incorrect_tags_trigger_enabled
   schedule = var.redshift_clusters_with_incorrect_tags_trigger_schedule
@@ -17,9 +17,9 @@ trigger "query" "detect_and_correct_redshift_clusters_with_incorrect_tags" {
 }
 
 pipeline "detect_and_correct_redshift_clusters_with_incorrect_tags" {
-  title         = "Detect & correct Redshift clusters with incorrect tags"
-  description   = "Detects Redshift clusters with incorrect tags and optionally attempts to correct them."
-  tags          = merge(local.redshift_common_tags, { type = "featured" })
+  title       = "Detect & correct Redshift clusters with incorrect tags"
+  description = "Detects Redshift clusters with incorrect tags and optionally attempts to correct them."
+  tags        = merge(local.redshift_common_tags, { type = "featured" })
 
   param "database" {
     type        = string
@@ -95,42 +95,42 @@ variable "redshift_clusters_with_incorrect_tags_trigger_schedule" {
 locals {
   redshift_clusters_tag_rules = {
     add           = merge(local.base_tag_rules.add, try(var.redshift_clusters_tag_rules.add, {}))
-    remove        = distinct(concat(local.base_tag_rules.remove , try(var.redshift_clusters_tag_rules.remove, [])))
-    remove_except = distinct(concat(local.base_tag_rules.remove_except , try(var.redshift_clusters_tag_rules.remove_except, [])))
+    remove        = distinct(concat(local.base_tag_rules.remove, try(var.redshift_clusters_tag_rules.remove, [])))
+    remove_except = distinct(concat(local.base_tag_rules.remove_except, try(var.redshift_clusters_tag_rules.remove_except, [])))
     update_keys   = merge(local.base_tag_rules.update_keys, try(var.redshift_clusters_tag_rules.update_keys, {}))
     update_values = merge(local.base_tag_rules.update_values, try(var.redshift_clusters_tag_rules.update_values, {}))
   }
 }
 
 locals {
-  redshift_clusters_update_keys_override   = join("\n", flatten([for key, patterns in local.redshift_clusters_tag_rules.update_keys : [for pattern in patterns : format("      when key %s '%s' then '%s'", (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? element(split(":", pattern), 0) : "="), (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? join(":", slice(split(":", pattern), 1, length(split(":", pattern)))) : pattern), key)]]))
-  redshift_clusters_remove_override        = join("\n", length(local.redshift_clusters_tag_rules.remove) == 0 ? ["      when new_key like '%' then false"] : [for pattern in local.redshift_clusters_tag_rules.remove : format("      when new_key %s '%s' then true", (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? element(split(":", pattern), 0) : "="), (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? join(":", slice(split(":", pattern), 1, length(split(":", pattern)))) : pattern))])
-  redshift_clusters_remove_except_override = join("\n", length(local.redshift_clusters_tag_rules.remove_except) == 0 ? ["      when new_key like '%' then true"] : flatten([[for key in keys(merge(local.redshift_clusters_tag_rules.add, local.redshift_clusters_tag_rules.update_keys)) : format("      when new_key = '%s' then true", key)], [for pattern in local.redshift_clusters_tag_rules.remove_except : format("      when new_key %s '%s' then true", (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? element(split(":", pattern), 0) : "="), (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? join(":", slice(split(":", pattern), 1, length(split(":", pattern)))) : pattern))]]))
-  redshift_clusters_add_override           = join(",\n", length(keys(local.redshift_clusters_tag_rules.add)) == 0 ? ["      (null, null)"] : [for key, value in local.redshift_clusters_tag_rules.add : format("      ('%s', '%s')", key, value)])
-  redshift_clusters_update_values_override = join("\n", flatten([for key in sort(keys(local.redshift_clusters_tag_rules.update_values)) : [flatten([for new_value, patterns in local.redshift_clusters_tag_rules.update_values[key] : [contains(patterns, "else:") ? [] : [for pattern in patterns : format("      when new_key = '%s' and value %s '%s' then '%s'", key, (length(split(": ", pattern)) > 1 && contains(local.operators, element(split(": ", pattern), 0)) ? element(split(": ", pattern), 0) : "="), (length(split(": ", pattern)) > 1 && contains(local.operators, element(split(": ", pattern), 0)) ? join(": ", slice(split(": ", pattern), 1, length(split(": ", pattern)))) : pattern), new_value)]]]), contains(flatten([for p in values(local.redshift_clusters_tag_rules.update_values[key]) : p]), "else:") ? [format("      when new_key = '%s' then '%s'", key, [for new_value, patterns in local.redshift_clusters_tag_rules.update_values[key] : new_value if contains(patterns, "else:")][0])] : []]]))
-}
+  redshift_clusters_update_keys_override = join("\n", flatten([for key, patterns in local.redshift_clusters_tag_rules.update_keys : [for pattern in patterns : format("      when key %s '%s' then '%s'", (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? element(split(":", pattern), 0) : "="), (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? join(":", slice(split(":", pattern), 1, length(split(":", pattern)))) : pattern), key)]]))
+  redshift_clusters_remove_override      = join("\n", length(local.redshift_clusters_tag_rules.remove) == 0 ? ["      when new_key like '%' then false"] : [for pattern in local.redshift_clusters_tag_rules.remove : format("      when new_key %s '%s' then true", (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? element(split(":", pattern), 0) : "="), (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? join(":", slice(split(":", pattern), 1, length(split(":", pattern)))) : pattern))])
+  redshift_clusters_remove_except_override = join("\n", length(local.redshift_clusters_tag_rules.remove_except) == 0 ? ["      when new_key like '%' then true"] : flatten( [[for key in keys(merge(local.redshift_clusters_tag_rules.add, local.redshift_clusters_tag_rules.update_keys)) : format("      when new_key = '%s' then true", key)], [for pattern in local.redshift_clusters_tag_rules.remove_except : format("      when new_key %s '%s' then true", (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? element(split(":", pattern), 0) : "="), (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? join(":", slice(split(":", pattern), 1, length(split(":", pattern)))) : pattern))]]))
+    redshift_clusters_add_override           = join(",\n", length(keys(local.redshift_clusters_tag_rules.add)) == 0 ? ["      (null, null)"] : [for key, value in local.redshift_clusters_tag_rules.add : format("      ('%s', '%s')", key, value)])
+    redshift_clusters_update_values_override = join("\n", flatten([for key in sort(keys(local.redshift_clusters_tag_rules.update_values)) : [flatten([for new_value, patterns in local.redshift_clusters_tag_rules.update_values[key] : [contains(patterns, "else:") ? [] : [for pattern in patterns : format("      when new_key = '%s' and value %s '%s' then '%s'", key, (length(split(": ", pattern)) > 1 && contains(local.operators, element(split(": ", pattern), 0)) ? element(split(": ", pattern), 0) : "="), (length(split(": ", pattern)) > 1 && contains(local.operators, element(split(": ", pattern), 0)) ? join(": ", slice(split(": ", pattern), 1, length(split(": ", pattern)))) : pattern), new_value)]]]), contains(flatten([for p in values(local.redshift_clusters_tag_rules.update_values[key]) : p]), "else:") ? [format("      when new_key = '%s' then '%s'", key, [for new_value, patterns in local.redshift_clusters_tag_rules.update_values[key] : new_value if contains(patterns, "else:")][0])] : []]]))
+    }
 
-locals {
-  redshift_clusters_with_incorrect_tags_query = replace(
-    replace(
-      replace(
+    locals {
+      redshift_clusters_with_incorrect_tags_query = replace(
         replace(
           replace(
             replace(
               replace(
-                local.tags_query_template,
-                "__TITLE__", "cluster_identifier"
+                replace(
+                  replace(
+                    local.tags_query_template,
+                    "__TITLE__", "cluster_identifier"
+                  ),
+                  "__TABLE_NAME__", "aws_redshift_cluster"
+                ),
+                "__UPDATE_KEYS_OVERRIDE__", local.redshift_clusters_update_keys_override
               ),
-              "__TABLE_NAME__", "aws_redshift_cluster"
+              "__REMOVE_OVERRIDE__", local.redshift_clusters_remove_override
             ),
-            "__UPDATE_KEYS_OVERRIDE__", local.redshift_clusters_update_keys_override
+            "__REMOVE_EXCEPT_OVERRIDE__", local.redshift_clusters_remove_except_override
           ),
-          "__REMOVE_OVERRIDE__", local.redshift_clusters_remove_override
+          "__ADD_OVERRIDE__", local.redshift_clusters_add_override
         ),
-        "__REMOVE_EXCEPT_OVERRIDE__", local.redshift_clusters_remove_except_override
-      ),
-      "__ADD_OVERRIDE__", local.redshift_clusters_add_override
-    ),
-    "__UPDATE_VALUES_OVERRIDE__", local.redshift_clusters_update_values_override
-  )
-}
+        "__UPDATE_VALUES_OVERRIDE__", local.redshift_clusters_update_values_override
+      )
+    }

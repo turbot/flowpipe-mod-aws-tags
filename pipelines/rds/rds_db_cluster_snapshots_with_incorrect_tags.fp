@@ -1,7 +1,7 @@
 trigger "query" "detect_and_correct_rds_db_cluster_snapshots_with_incorrect_tags" {
-  title         = "Detect & correct RDS DB cluster snapshots with incorrect tags"
-  description   = "Detects RDS DB cluster snapshots with incorrect tags and optionally attempts to correct them."
-  tags          = local.rds_common_tags
+  title       = "Detect & correct RDS DB cluster snapshots with incorrect tags"
+  description = "Detects RDS DB cluster snapshots with incorrect tags and optionally attempts to correct them."
+  tags        = local.rds_common_tags
 
   enabled  = var.rds_db_cluster_snapshots_with_incorrect_tags_trigger_enabled
   schedule = var.rds_db_cluster_snapshots_with_incorrect_tags_trigger_schedule
@@ -17,9 +17,9 @@ trigger "query" "detect_and_correct_rds_db_cluster_snapshots_with_incorrect_tags
 }
 
 pipeline "detect_and_correct_rds_db_cluster_snapshots_with_incorrect_tags" {
-  title         = "Detect & correct RDS DB cluster snapshots with incorrect tags"
-  description   = "Detects RDS DB cluster snapshots with incorrect tags and optionally attempts to correct them."
-  tags          = merge(local.rds_common_tags, { type = "featured" })
+  title       = "Detect & correct RDS DB cluster snapshots with incorrect tags"
+  description = "Detects RDS DB cluster snapshots with incorrect tags and optionally attempts to correct them."
+  tags        = merge(local.rds_common_tags, { type = "featured" })
 
   param "database" {
     type        = string
@@ -95,42 +95,42 @@ variable "rds_db_cluster_snapshots_with_incorrect_tags_trigger_schedule" {
 locals {
   rds_db_cluster_snapshots_tag_rules = {
     add           = merge(local.base_tag_rules.add, try(var.rds_db_cluster_snapshots_tag_rules.add, {}))
-    remove        = distinct(concat(local.base_tag_rules.remove , try(var.rds_db_cluster_snapshots_tag_rules.remove, [])))
-    remove_except = distinct(concat(local.base_tag_rules.remove_except , try(var.rds_db_cluster_snapshots_tag_rules.remove_except, [])))
+    remove        = distinct(concat(local.base_tag_rules.remove, try(var.rds_db_cluster_snapshots_tag_rules.remove, [])))
+    remove_except = distinct(concat(local.base_tag_rules.remove_except, try(var.rds_db_cluster_snapshots_tag_rules.remove_except, [])))
     update_keys   = merge(local.base_tag_rules.update_keys, try(var.rds_db_cluster_snapshots_tag_rules.update_keys, {}))
     update_values = merge(local.base_tag_rules.update_values, try(var.rds_db_cluster_snapshots_tag_rules.update_values, {}))
   }
 }
 
 locals {
-  rds_db_cluster_snapshots_update_keys_override   = join("\n", flatten([for key, patterns in local.rds_db_cluster_snapshots_tag_rules.update_keys : [for pattern in patterns : format("      when key %s '%s' then '%s'", (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? element(split(":", pattern), 0) : "="), (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? join(":", slice(split(":", pattern), 1, length(split(":", pattern)))) : pattern), key)]]))
-  rds_db_cluster_snapshots_remove_override        = join("\n", length(local.rds_db_cluster_snapshots_tag_rules.remove) == 0 ? ["      when new_key like '%' then false"] : [for pattern in local.rds_db_cluster_snapshots_tag_rules.remove : format("      when new_key %s '%s' then true", (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? element(split(":", pattern), 0) : "="), (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? join(":", slice(split(":", pattern), 1, length(split(":", pattern)))) : pattern))])
-  rds_db_cluster_snapshots_remove_except_override = join("\n", length(local.rds_db_cluster_snapshots_tag_rules.remove_except) == 0 ? ["      when new_key like '%' then true"] : flatten([[for key in keys(merge(local.rds_db_cluster_snapshots_tag_rules.add, local.rds_db_cluster_snapshots_tag_rules.update_keys)) : format("      when new_key = '%s' then true", key)], [for pattern in local.rds_db_cluster_snapshots_tag_rules.remove_except : format("      when new_key %s '%s' then true", (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? element(split(":", pattern), 0) : "="), (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? join(":", slice(split(":", pattern), 1, length(split(":", pattern)))) : pattern))]]))
-  rds_db_cluster_snapshots_add_override           = join(",\n", length(keys(local.rds_db_cluster_snapshots_tag_rules.add)) == 0 ? ["      (null, null)"] : [for key, value in local.rds_db_cluster_snapshots_tag_rules.add : format("      ('%s', '%s')", key, value)])
-  rds_db_cluster_snapshots_update_values_override = join("\n", flatten([for key in sort(keys(local.rds_db_cluster_snapshots_tag_rules.update_values)) : [flatten([for new_value, patterns in local.rds_db_cluster_snapshots_tag_rules.update_values[key] : [contains(patterns, "else:") ? [] : [for pattern in patterns : format("      when new_key = '%s' and value %s '%s' then '%s'", key, (length(split(": ", pattern)) > 1 && contains(local.operators, element(split(": ", pattern), 0)) ? element(split(": ", pattern), 0) : "="), (length(split(": ", pattern)) > 1 && contains(local.operators, element(split(": ", pattern), 0)) ? join(": ", slice(split(": ", pattern), 1, length(split(": ", pattern)))) : pattern), new_value)]]]), contains(flatten([for p in values(local.rds_db_cluster_snapshots_tag_rules.update_values[key]) : p]), "else:") ? [format("      when new_key = '%s' then '%s'", key, [for new_value, patterns in local.rds_db_cluster_snapshots_tag_rules.update_values[key] : new_value if contains(patterns, "else:")][0])] : []]]))
-}
+  rds_db_cluster_snapshots_update_keys_override = join("\n", flatten([for key, patterns in local.rds_db_cluster_snapshots_tag_rules.update_keys : [for pattern in patterns : format("      when key %s '%s' then '%s'", (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? element(split(":", pattern), 0) : "="), (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? join(":", slice(split(":", pattern), 1, length(split(":", pattern)))) : pattern), key)]]))
+  rds_db_cluster_snapshots_remove_override      = join("\n", length(local.rds_db_cluster_snapshots_tag_rules.remove) == 0 ? ["      when new_key like '%' then false"] : [for pattern in local.rds_db_cluster_snapshots_tag_rules.remove : format("      when new_key %s '%s' then true", (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? element(split(":", pattern), 0) : "="), (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? join(":", slice(split(":", pattern), 1, length(split(":", pattern)))) : pattern))])
+  rds_db_cluster_snapshots_remove_except_override = join("\n", length(local.rds_db_cluster_snapshots_tag_rules.remove_except) == 0 ? ["      when new_key like '%' then true"] : flatten( [[for key in keys(merge(local.rds_db_cluster_snapshots_tag_rules.add, local.rds_db_cluster_snapshots_tag_rules.update_keys)) : format("      when new_key = '%s' then true", key)], [for pattern in local.rds_db_cluster_snapshots_tag_rules.remove_except : format("      when new_key %s '%s' then true", (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? element(split(":", pattern), 0) : "="), (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? join(":", slice(split(":", pattern), 1, length(split(":", pattern)))) : pattern))]]))
+    rds_db_cluster_snapshots_add_override           = join(",\n", length(keys(local.rds_db_cluster_snapshots_tag_rules.add)) == 0 ? ["      (null, null)"] : [for key, value in local.rds_db_cluster_snapshots_tag_rules.add : format("      ('%s', '%s')", key, value)])
+    rds_db_cluster_snapshots_update_values_override = join("\n", flatten([for key in sort(keys(local.rds_db_cluster_snapshots_tag_rules.update_values)) : [flatten([for new_value, patterns in local.rds_db_cluster_snapshots_tag_rules.update_values[key] : [contains(patterns, "else:") ? [] : [for pattern in patterns : format("      when new_key = '%s' and value %s '%s' then '%s'", key, (length(split(": ", pattern)) > 1 && contains(local.operators, element(split(": ", pattern), 0)) ? element(split(": ", pattern), 0) : "="), (length(split(": ", pattern)) > 1 && contains(local.operators, element(split(": ", pattern), 0)) ? join(": ", slice(split(": ", pattern), 1, length(split(": ", pattern)))) : pattern), new_value)]]]), contains(flatten([for p in values(local.rds_db_cluster_snapshots_tag_rules.update_values[key]) : p]), "else:") ? [format("      when new_key = '%s' then '%s'", key, [for new_value, patterns in local.rds_db_cluster_snapshots_tag_rules.update_values[key] : new_value if contains(patterns, "else:")][0])] : []]]))
+    }
 
-locals {
-  rds_db_cluster_snapshots_with_incorrect_tags_query = replace(
-    replace(
-      replace(
+    locals {
+      rds_db_cluster_snapshots_with_incorrect_tags_query = replace(
         replace(
           replace(
             replace(
               replace(
-                local.tags_query_template,
-                "__TITLE__", "db_cluster_snapshot_identifier"
+                replace(
+                  replace(
+                    local.tags_query_template,
+                    "__TITLE__", "db_cluster_snapshot_identifier"
+                  ),
+                  "__TABLE_NAME__", "aws_rds_db_cluster_snapshot"
+                ),
+                "__UPDATE_KEYS_OVERRIDE__", local.rds_db_cluster_snapshots_update_keys_override
               ),
-              "__TABLE_NAME__", "aws_rds_db_cluster_snapshot"
+              "__REMOVE_OVERRIDE__", local.rds_db_cluster_snapshots_remove_override
             ),
-            "__UPDATE_KEYS_OVERRIDE__", local.rds_db_cluster_snapshots_update_keys_override
+            "__REMOVE_EXCEPT_OVERRIDE__", local.rds_db_cluster_snapshots_remove_except_override
           ),
-          "__REMOVE_OVERRIDE__", local.rds_db_cluster_snapshots_remove_override
+          "__ADD_OVERRIDE__", local.rds_db_cluster_snapshots_add_override
         ),
-        "__REMOVE_EXCEPT_OVERRIDE__", local.rds_db_cluster_snapshots_remove_except_override
-      ),
-      "__ADD_OVERRIDE__", local.rds_db_cluster_snapshots_add_override
-    ),
-    "__UPDATE_VALUES_OVERRIDE__", local.rds_db_cluster_snapshots_update_values_override
-  )
-}
+        "__UPDATE_VALUES_OVERRIDE__", local.rds_db_cluster_snapshots_update_values_override
+      )
+    }

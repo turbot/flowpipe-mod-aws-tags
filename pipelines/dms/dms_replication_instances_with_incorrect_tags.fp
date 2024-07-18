@@ -1,7 +1,7 @@
 trigger "query" "detect_and_correct_dms_replication_instances_with_incorrect_tags" {
-  title         = "Detect & correct DMS replication instances with incorrect tags"
-  description   = "Detects DMS replication instances with incorrect tags and optionally attempts to correct them."
-  tags          = local.dms_common_tags
+  title       = "Detect & correct DMS replication instances with incorrect tags"
+  description = "Detects DMS replication instances with incorrect tags and optionally attempts to correct them."
+  tags        = local.dms_common_tags
 
   enabled  = var.dms_replication_instances_with_incorrect_tags_trigger_enabled
   schedule = var.dms_replication_instances_with_incorrect_tags_trigger_schedule
@@ -17,9 +17,9 @@ trigger "query" "detect_and_correct_dms_replication_instances_with_incorrect_tag
 }
 
 pipeline "detect_and_correct_dms_replication_instances_with_incorrect_tags" {
-  title         = "Detect & correct DMS replication instances with incorrect tags"
-  description   = "Detects DMS replication instances with incorrect tags and optionally attempts to correct them."
-  tags          = merge(local.dms_common_tags, { type = "featured" })
+  title       = "Detect & correct DMS replication instances with incorrect tags"
+  description = "Detects DMS replication instances with incorrect tags and optionally attempts to correct them."
+  tags        = merge(local.dms_common_tags, { type = "featured" })
 
   param "database" {
     type        = string
@@ -95,42 +95,42 @@ variable "dms_replication_instances_with_incorrect_tags_trigger_schedule" {
 locals {
   dms_replication_instances_tag_rules = {
     add           = merge(local.base_tag_rules.add, try(var.dms_replication_instances_tag_rules.add, {}))
-    remove        = distinct(concat(local.base_tag_rules.remove , try(var.dms_replication_instances_tag_rules.remove, [])))
-    remove_except = distinct(concat(local.base_tag_rules.remove_except , try(var.dms_replication_instances_tag_rules.remove_except, [])))
+    remove        = distinct(concat(local.base_tag_rules.remove, try(var.dms_replication_instances_tag_rules.remove, [])))
+    remove_except = distinct(concat(local.base_tag_rules.remove_except, try(var.dms_replication_instances_tag_rules.remove_except, [])))
     update_keys   = merge(local.base_tag_rules.update_keys, try(var.dms_replication_instances_tag_rules.update_keys, {}))
     update_values = merge(local.base_tag_rules.update_values, try(var.dms_replication_instances_tag_rules.update_values, {}))
   }
 }
 
 locals {
-  dms_replication_instances_update_keys_override   = join("\n", flatten([for key, patterns in local.dms_replication_instances_tag_rules.update_keys : [for pattern in patterns : format("      when key %s '%s' then '%s'", (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? element(split(":", pattern), 0) : "="), (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? join(":", slice(split(":", pattern), 1, length(split(":", pattern)))) : pattern), key)]]))
-  dms_replication_instances_remove_override        = join("\n", length(local.dms_replication_instances_tag_rules.remove) == 0 ? ["      when new_key like '%' then false"] : [for pattern in local.dms_replication_instances_tag_rules.remove : format("      when new_key %s '%s' then true", (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? element(split(":", pattern), 0) : "="), (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? join(":", slice(split(":", pattern), 1, length(split(":", pattern)))) : pattern))])
-  dms_replication_instances_remove_except_override = join("\n", length(local.dms_replication_instances_tag_rules.remove_except) == 0 ? ["      when new_key like '%' then true"] : flatten([[for key in keys(merge(local.dms_replication_instances_tag_rules.add, local.dms_replication_instances_tag_rules.update_keys)) : format("      when new_key = '%s' then true", key)], [for pattern in local.dms_replication_instances_tag_rules.remove_except : format("      when new_key %s '%s' then true", (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? element(split(":", pattern), 0) : "="), (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? join(":", slice(split(":", pattern), 1, length(split(":", pattern)))) : pattern))]]))
-  dms_replication_instances_add_override           = join(",\n", length(keys(local.dms_replication_instances_tag_rules.add)) == 0 ? ["      (null, null)"] : [for key, value in local.dms_replication_instances_tag_rules.add : format("      ('%s', '%s')", key, value)])
-  dms_replication_instances_update_values_override = join("\n", flatten([for key in sort(keys(local.dms_replication_instances_tag_rules.update_values)) : [flatten([for new_value, patterns in local.dms_replication_instances_tag_rules.update_values[key] : [contains(patterns, "else:") ? [] : [for pattern in patterns : format("      when new_key = '%s' and value %s '%s' then '%s'", key, (length(split(": ", pattern)) > 1 && contains(local.operators, element(split(": ", pattern), 0)) ? element(split(": ", pattern), 0) : "="), (length(split(": ", pattern)) > 1 && contains(local.operators, element(split(": ", pattern), 0)) ? join(": ", slice(split(": ", pattern), 1, length(split(": ", pattern)))) : pattern), new_value)]]]), contains(flatten([for p in values(local.dms_replication_instances_tag_rules.update_values[key]) : p]), "else:") ? [format("      when new_key = '%s' then '%s'", key, [for new_value, patterns in local.dms_replication_instances_tag_rules.update_values[key] : new_value if contains(patterns, "else:")][0])] : []]]))
-}
+  dms_replication_instances_update_keys_override = join("\n", flatten([for key, patterns in local.dms_replication_instances_tag_rules.update_keys : [for pattern in patterns : format("      when key %s '%s' then '%s'", (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? element(split(":", pattern), 0) : "="), (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? join(":", slice(split(":", pattern), 1, length(split(":", pattern)))) : pattern), key)]]))
+  dms_replication_instances_remove_override      = join("\n", length(local.dms_replication_instances_tag_rules.remove) == 0 ? ["      when new_key like '%' then false"] : [for pattern in local.dms_replication_instances_tag_rules.remove : format("      when new_key %s '%s' then true", (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? element(split(":", pattern), 0) : "="), (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? join(":", slice(split(":", pattern), 1, length(split(":", pattern)))) : pattern))])
+  dms_replication_instances_remove_except_override = join("\n", length(local.dms_replication_instances_tag_rules.remove_except) == 0 ? ["      when new_key like '%' then true"] : flatten( [[for key in keys(merge(local.dms_replication_instances_tag_rules.add, local.dms_replication_instances_tag_rules.update_keys)) : format("      when new_key = '%s' then true", key)], [for pattern in local.dms_replication_instances_tag_rules.remove_except : format("      when new_key %s '%s' then true", (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? element(split(":", pattern), 0) : "="), (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? join(":", slice(split(":", pattern), 1, length(split(":", pattern)))) : pattern))]]))
+    dms_replication_instances_add_override           = join(",\n", length(keys(local.dms_replication_instances_tag_rules.add)) == 0 ? ["      (null, null)"] : [for key, value in local.dms_replication_instances_tag_rules.add : format("      ('%s', '%s')", key, value)])
+    dms_replication_instances_update_values_override = join("\n", flatten([for key in sort(keys(local.dms_replication_instances_tag_rules.update_values)) : [flatten([for new_value, patterns in local.dms_replication_instances_tag_rules.update_values[key] : [contains(patterns, "else:") ? [] : [for pattern in patterns : format("      when new_key = '%s' and value %s '%s' then '%s'", key, (length(split(": ", pattern)) > 1 && contains(local.operators, element(split(": ", pattern), 0)) ? element(split(": ", pattern), 0) : "="), (length(split(": ", pattern)) > 1 && contains(local.operators, element(split(": ", pattern), 0)) ? join(": ", slice(split(": ", pattern), 1, length(split(": ", pattern)))) : pattern), new_value)]]]), contains(flatten([for p in values(local.dms_replication_instances_tag_rules.update_values[key]) : p]), "else:") ? [format("      when new_key = '%s' then '%s'", key, [for new_value, patterns in local.dms_replication_instances_tag_rules.update_values[key] : new_value if contains(patterns, "else:")][0])] : []]]))
+    }
 
-locals {
-  dms_replication_instances_with_incorrect_tags_query = replace(
-    replace(
-      replace(
+    locals {
+      dms_replication_instances_with_incorrect_tags_query = replace(
         replace(
           replace(
             replace(
               replace(
-                local.tags_query_template,
-                "__TITLE__", "replication_instance_identifier"
+                replace(
+                  replace(
+                    local.tags_query_template,
+                    "__TITLE__", "replication_instance_identifier"
+                  ),
+                  "__TABLE_NAME__", "aws_dms_replication_instance"
+                ),
+                "__UPDATE_KEYS_OVERRIDE__", local.dms_replication_instances_update_keys_override
               ),
-              "__TABLE_NAME__", "aws_dms_replication_instance"
+              "__REMOVE_OVERRIDE__", local.dms_replication_instances_remove_override
             ),
-            "__UPDATE_KEYS_OVERRIDE__", local.dms_replication_instances_update_keys_override
+            "__REMOVE_EXCEPT_OVERRIDE__", local.dms_replication_instances_remove_except_override
           ),
-          "__REMOVE_OVERRIDE__", local.dms_replication_instances_remove_override
+          "__ADD_OVERRIDE__", local.dms_replication_instances_add_override
         ),
-        "__REMOVE_EXCEPT_OVERRIDE__", local.dms_replication_instances_remove_except_override
-      ),
-      "__ADD_OVERRIDE__", local.dms_replication_instances_add_override
-    ),
-    "__UPDATE_VALUES_OVERRIDE__", local.dms_replication_instances_update_values_override
-  )
-}
+        "__UPDATE_VALUES_OVERRIDE__", local.dms_replication_instances_update_values_override
+      )
+    }
