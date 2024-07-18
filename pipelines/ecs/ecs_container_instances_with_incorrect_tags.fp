@@ -1,5 +1,5 @@
 trigger "query" "detect_and_correct_ecs_container_instances_with_incorrect_tags" {
-  title         = "Detect & correct ECS container_instances with incorrect tags"
+  title         = "Detect & correct ECS container instances with incorrect tags"
   description   = "Detects ECS container_instances with incorrect tags and optionally attempts to correct them."
   tags          = local.ecs_common_tags
 
@@ -94,7 +94,7 @@ variable "ecs_container_instances_with_incorrect_tags_trigger_schedule" {
 
 locals {
   ecs_container_instances_tag_rules = {
-    add           = merge(local.base_tag_rules.add, try(var.ecs_container_instances_tag_rules.add, {})) 
+    add           = merge(local.base_tag_rules.add, try(var.ecs_container_instances_tag_rules.add, {}))
     remove        = distinct(concat(local.base_tag_rules.remove , try(var.ecs_container_instances_tag_rules.remove, [])))
     remove_except = distinct(concat(local.base_tag_rules.remove_except , try(var.ecs_container_instances_tag_rules.remove_except, [])))
     update_keys   = merge(local.base_tag_rules.update_keys, try(var.ecs_container_instances_tag_rules.update_keys, {}))
