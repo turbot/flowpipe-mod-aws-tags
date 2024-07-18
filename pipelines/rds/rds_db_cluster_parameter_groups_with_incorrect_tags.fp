@@ -76,7 +76,7 @@ variable "rds_db_cluster_parameter_groups_tag_rules" {
     update_keys   = optional(map(list(string)))
     update_values = optional(map(map(list(string))))
   })
-  description = "RDS DB cluster parameter group specific tag rules"
+  description = "RDS DB Cluster Parameter Group specific tag rules"
   default     = null
 }
 

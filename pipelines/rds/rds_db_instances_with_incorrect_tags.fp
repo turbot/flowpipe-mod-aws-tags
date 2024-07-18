@@ -76,7 +76,7 @@ variable "rds_db_instances_tag_rules" {
     update_keys   = optional(map(list(string)))
     update_values = optional(map(map(list(string))))
   })
-  description = "RDS DB instance specific tag rules"
+  description = "RDS DB Instance specific tag rules"
   default     = null
 }
 

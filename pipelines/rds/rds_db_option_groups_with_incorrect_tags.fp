@@ -76,7 +76,7 @@ variable "rds_db_option_groups_tag_rules" {
     update_keys   = optional(map(list(string)))
     update_values = optional(map(map(list(string))))
   })
-  description = "RDS BD option group specific tag rules"
+  description = "RDS DB Option Group specific tag rules"
   default     = null
 }
 

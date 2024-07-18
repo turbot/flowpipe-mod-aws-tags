@@ -76,7 +76,7 @@ variable "rds_db_clusters_tag_rules" {
     update_keys   = optional(map(list(string)))
     update_values = optional(map(map(list(string))))
   })
-  description = "RDS DB clusters specific tag rules"
+  description = "RDS DB Cluster specific tag rules"
   default     = null
 }
 
