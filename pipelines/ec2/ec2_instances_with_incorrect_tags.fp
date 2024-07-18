@@ -119,7 +119,7 @@ locals {
             replace(
               replace(
                 local.tags_query_template,
-                "__TITLE__", "name"
+                "__TITLE__", "title"
               ),
               "__TABLE_NAME__", "aws_ec2_instance"
             ),
