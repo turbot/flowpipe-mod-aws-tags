@@ -446,22 +446,41 @@ flowpipe pipeline run detect_and_correct_s3_buckets_with_incorrect_tags --var-fi
 ```
 
 This will then run the pipeline and depending on your configured running mode; perform the relevant action(s), there are 3 running modes:
-- Notify Only
-- Automatic
 - Wizard
+- Notify
+- Automatic
 
-#### Notify Only
-This is the default `out-of-the-box` behavior, requiring no additional configuration. 
+#### Wizard
+This is the `default` running mode, allowing for a hands-on approach to approving changes to resource tags by prompting for [input](https://flowpipe.io/docs/build/input) for each resource detected violating the provided ruleset.
 
-As the name implies, this mode is designed to send a message on your configured [notifier](https://flowpipe.io/docs/reference/config-files/notifier) for each resource that violated a tagging rule along with the suggested remedial action.
+Whilst the out of the box default is to run the workflow directly in the terminal. You can use Flowpipe [server](https://flowpipe.io/docs/run/server) and [external integrations](https://flowpipe.io/docs/build/input) to prompt in `http`, `slack`, `teams`, etc.
+
+#### Notify
+This mode as the name implies is used purely to report detections via notifications either directly to your terminal when running in client mode or via another configured [notifier](https://flowpipe.io/docs/reference/config-files/notifier) when running in server mode for each resource that violated a tagging rule along with the suggested remedial action.
+
+To run in `notify` mode, you will need to set the `approvers` variable to an empty list `[]` and ensure the`incorrect_tags_default_action` variable is set to `notify`, either in your fpvars file
+
+```hcl
+# tags.fpvars
+approvers = []
+incorrect_tags_default_action = "notify"
+base_tag_rules = ... # omitted for brevity
+```
+
+or pass the `approvers` and `default_action` arguments on the command-line.
+
+```sh
+flowpipe pipeline run detect_and_correct_s3_buckets_with_incorrect_tags --var-file tags.fpvars --arg='default_action=notify' --arg='approvers=[]'
+```
 
 #### Automatic
 This behavior allows for a hands-off approach to remediating (or ignoring) your tagging ruleset violations.
 
-To run in automatic mode, you can either change the `incorrect_tags_default_action` variable from `notify` to either `skip` or `apply` in your fpvars file
+To run in `automatic` mode, you will need to set the `approvers` variable to an empty list `[]` and the `incorrect_tags_default_action` variable to either `skip` or `apply` in your fpvars file
 
 ```hcl
 # tags.fpvars
+approvers = []
 incorrect_tags_default_action = "apply"
 base_tag_rules = ... # omitted for brevity
 ```
@@ -472,33 +491,7 @@ or pass the `default_action` argument on the command-line.
 flowpipe pipeline run detect_and_correct_s3_buckets_with_incorrect_tags --var-file tags.fpvars --arg='default_action=apply'
 ```
 
-Valid values are:
-- `notify`: This is the default value and is actually [notify only](#notify-only) mode.
-- `skip`: This will ignore any detections and not perform any other remediative action.
-- `apply`: This will automatically apply the remediative actions to your resources.
-
 To further enhance this approach, you can enable the pipelines corresponding [query trigger](#running-query-triggers) to run completely hands-off.
-
-#### Wizard
-If you prefer a more hands-on approach to approving changes to your resources tags, you can run in wizard mode, which will prompt you for input on each resource detected that violates your ruleset.
-
-To run in wizard mode, you can either set the `approvers` variable in your `fpvars` file
-
-```hcl
-# tags.fpvars
-approvers = ["default"]
-base_tag_rules = ... # omitted for brevity
-```
-
-or pass the `approvers` argument on the command-line.
-
-```sh
-flowpipe pipeline run detect_and_correct_s3_buckets_with_incorrect_tags --var-file tags.fpvars --arg='approvers=["default"]'
-```
-
-This will run the pipeline locally, prompting you directly in the terminal to select the action for each detected resource.
-
-You can combine this approch using Flowpipe [server](https://flowpipe.io/docs/run/server) and [external integrations](https://flowpipe.io/docs/build/input) to prompt in `http`, `slack`, `teams`, etc.
 
 ### Running Query Triggers
 
