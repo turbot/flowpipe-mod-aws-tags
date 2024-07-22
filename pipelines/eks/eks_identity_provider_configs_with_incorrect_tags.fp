@@ -1,6 +1,6 @@
 trigger "query" "detect_and_correct_eks_identity_provider_configs_with_incorrect_tags" {
-  title         = "Detect & correct EKS identity provider config with incorrect tags"
-  description   = "Detects EKS identity provider config with incorrect tags and optionally attempts to correct them."
+  title         = "Detect & correct EKS identity provider configs with incorrect tags"
+  description   = "Detects EKS identity provider configs with incorrect tags and optionally attempts to correct them."
   tags          = local.eks_common_tags
 
   enabled  = var.eks_identity_provider_configs_with_incorrect_tags_trigger_enabled
@@ -17,8 +17,8 @@ trigger "query" "detect_and_correct_eks_identity_provider_configs_with_incorrect
 }
 
 pipeline "detect_and_correct_eks_identity_provider_configs_with_incorrect_tags" {
-  title         = "Detect & correct EKS identity provider config with incorrect tags"
-  description   = "Detects EKS identity provider config with incorrect tags and optionally attempts to correct them."
+  title         = "Detect & correct EKS identity provider configs with incorrect tags"
+  description   = "Detects EKS identity provider configs with incorrect tags and optionally attempts to correct them."
   tags          = merge(local.eks_common_tags, { type = "featured" })
 
   param "database" {
@@ -76,7 +76,7 @@ variable "eks_identity_provider_configs_tag_rules" {
     update_keys   = optional(map(list(string)))
     update_values = optional(map(map(list(string))))
   })
-  description = "EKS Identity Provider Config specific tag rules"
+  description = "EKS identity provider configs specific tag rules"
   default     = null
 }
 
