@@ -1,12 +1,12 @@
-trigger "query" "detect_and_correct_secretsmanager_secrets_with_incorrect_tags" {
+trigger "query" "detect_and_correct_secrets_manager_secrets_with_incorrect_tags" {
   title         = "Detect & correct Secrets Manager secrets with incorrect tags"
   description   = "Detects Secrets Manager secrets with incorrect tags and optionally attempts to correct them."
-  tags          = local.secretsmanager_common_tags
+  tags          = local.secrets_manager_common_tags
 
-  enabled  = var.secretsmanager_secrets_with_incorrect_tags_trigger_enabled
-  schedule = var.secretsmanager_secrets_with_incorrect_tags_trigger_schedule
+  enabled  = var.secrets_manager_secrets_with_incorrect_tags_trigger_enabled
+  schedule = var.secrets_manager_secrets_with_incorrect_tags_trigger_schedule
   database = var.database
-  sql      = local.secretsmanager_secrets_with_incorrect_tags_query
+  sql      = local.secrets_manager_secrets_with_incorrect_tags_query
 
   capture "insert" {
     pipeline = pipeline.correct_resources_with_incorrect_tags
@@ -16,10 +16,10 @@ trigger "query" "detect_and_correct_secretsmanager_secrets_with_incorrect_tags" 
   }
 }
 
-pipeline "detect_and_correct_secretsmanager_secrets_with_incorrect_tags" {
+pipeline "detect_and_correct_secrets_manager_secrets_with_incorrect_tags" {
   title         = "Detect & correct Secrets Manager secrets with incorrect tags"
   description   = "Detects Secrets Manager secrets with incorrect tags and optionally attempts to correct them."
-  tags          = merge(local.secretsmanager_common_tags, { type = "featured" })
+  tags          = merge(local.secrets_manager_common_tags, { type = "featured" })
 
   param "database" {
     type        = string
@@ -53,7 +53,7 @@ pipeline "detect_and_correct_secretsmanager_secrets_with_incorrect_tags" {
 
   step "query" "detect" {
     database = param.database
-    sql      = local.secretsmanager_secrets_with_incorrect_tags_query
+    sql      = local.secrets_manager_secrets_with_incorrect_tags_query
   }
 
   step "pipeline" "correct" {
@@ -80,13 +80,13 @@ variable "secretsmanager_secrets_tag_rules" {
   default     = null
 }
 
-variable "secretsmanager_secrets_with_incorrect_tags_trigger_enabled" {
+variable "secrets_manager_secrets_with_incorrect_tags_trigger_enabled" {
   type        = bool
   default     = false
   description = "If true, the trigger is enabled."
 }
 
-variable "secretsmanager_secrets_with_incorrect_tags_trigger_schedule" {
+variable "secrets_manager_secrets_with_incorrect_tags_trigger_schedule" {
   type        = string
   default     = "15m"
   description = "The schedule on which to run the trigger if enabled."
@@ -111,7 +111,7 @@ locals {
 }
 
 locals {
-  secretsmanager_secrets_with_incorrect_tags_query = replace(
+  secrets_manager_secrets_with_incorrect_tags_query = replace(
     replace(
       replace(
         replace(

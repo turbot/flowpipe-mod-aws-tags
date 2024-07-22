@@ -1,12 +1,12 @@
-trigger "query" "detect_and_correct_accessanalyzer_with_incorrect_tags" {
+trigger "query" "detect_and_correct_access_analyzers_with_incorrect_tags" {
   title         = "Detect & correct Access Analyzers with incorrect tags"
   description   = "Detects Access Analyzers with incorrect tags and optionally attempts to correct them."
-  tags          = local.accessanalyzer_common_tags
+  tags          = local.access_analyzer_common_tags
 
-  enabled  = var.accessanalyzer_with_incorrect_tags_trigger_enabled
-  schedule = var.accessanalyzer_with_incorrect_tags_trigger_schedule
+  enabled  = var.access_analyzers_with_incorrect_tags_trigger_enabled
+  schedule = var.access_analyzers_with_incorrect_tags_trigger_schedule
   database = var.database
-  sql      = local.accessanalyzer_with_incorrect_tags_query
+  sql      = local.access_analyzers_with_incorrect_tags_query
 
   capture "insert" {
     pipeline = pipeline.correct_resources_with_incorrect_tags
@@ -16,10 +16,10 @@ trigger "query" "detect_and_correct_accessanalyzer_with_incorrect_tags" {
   }
 }
 
-pipeline "detect_and_correct_accessanalyzer_with_incorrect_tags" {
+pipeline "detect_and_correct_access_analyzers_with_incorrect_tags" {
   title         = "Detect & correct Access Analyzers with incorrect tags"
   description   = "Detects Access Analyzers with incorrect tags and optionally attempts to correct them."
-  tags          = merge(local.accessanalyzer_common_tags, { type = "featured" })
+  tags          = merge(local.access_analyzer_common_tags, { type = "featured" })
 
   param "database" {
     type        = string
@@ -53,7 +53,7 @@ pipeline "detect_and_correct_accessanalyzer_with_incorrect_tags" {
 
   step "query" "detect" {
     database = param.database
-    sql      = local.accessanalyzer_with_incorrect_tags_query
+    sql      = local.access_analyzers_with_incorrect_tags_query
   }
 
   step "pipeline" "correct" {
@@ -80,13 +80,13 @@ variable "accessanalyzer_tag_rules" {
   default     = null
 }
 
-variable "accessanalyzer_with_incorrect_tags_trigger_enabled" {
+variable "access_analyzers_with_incorrect_tags_trigger_enabled" {
   type        = bool
   default     = false
   description = "If true, the trigger is enabled."
 }
 
-variable "accessanalyzer_with_incorrect_tags_trigger_schedule" {
+variable "access_analyzers_with_incorrect_tags_trigger_schedule" {
   type        = string
   default     = "15m"
   description = "The schedule on which to run the trigger if enabled."
@@ -111,7 +111,7 @@ locals {
 }
 
 locals {
-  accessanalyzer_with_incorrect_tags_query = replace(
+  access_analyzers_with_incorrect_tags_query = replace(
     replace(
       replace(
         replace(
