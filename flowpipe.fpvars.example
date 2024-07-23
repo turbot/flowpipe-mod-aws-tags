@@ -5,7 +5,7 @@ notification_level            = "info"
 approvers                     = ["default"]
 max_concurrency               = 1
 
-incorrect_tags_default_action = notify
+incorrect_tags_default_action = "notify"
 
 base_tag_rules = {
   add           = {}
