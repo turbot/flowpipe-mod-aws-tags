@@ -1,14 +1,292 @@
 ## Core options
-#database           = "postgres:#steampipe@localhost:9193/steampipe"
-#notifier           = "default"
-#notification_level = "info"
-#approvers          = []
-#max_concurrency    = 1
+database           = "postgres:#steampipe@localhost:9193/steampipe"
+notifier           = "default"
+notification_level = "info"
+approvers          = ["default"]
+max_concurrency    = 1
 
-#base_tag_rules = {
-#  add           = {}
-#  remove        = []
-#  remove_except = []
-#  update_keys   = {}
-#  update_values = {}
-#}
+incorrect_tags_default_action = notify
+
+base_tag_rules = {
+  add           = {}
+  remove        = []
+  remove_except = []
+  update_keys   = {}
+  update_values = {}
+}
+
+# access_analyzers_with_incorrect_tags_trigger_enabled = false
+# access_analyzers_with_incorrect_tags_trigger_schedule = "15m"
+# accessanalyzer_tag_rules = {}
+
+# cloudfront_distributions_tag_rules = {}
+# cloudfront_distributions_with_incorrect_tags_trigger_enabled = false
+# cloudfront_distributions_with_incorrect_tags_trigger_schedule = "15m"
+
+# cloudwatch_alarms_tag_rules = {}
+# cloudwatch_alarms_with_incorrect_tags_trigger_enabled = false
+# cloudwatch_alarms_with_incorrect_tags_trigger_schedule = "15m"
+
+# codebuild_projects_tag_rules = {}
+# codebuild_projects_with_incorrect_tags_trigger_enabled = false
+# codebuild_projects_with_incorrect_tags_trigger_schedule = "15m"
+
+# codecommit_repositories_tag_rules = {}
+# codecommit_repositories_with_incorrect_tags_trigger_enabled = false
+# codecommit_repositories_with_incorrect_tags_trigger_schedule = "15m"
+
+# codepipeline_pipelines_tag_rules = {}
+# codepipeline_pipelines_with_incorrect_tags_trigger_enabled = false
+# codepipeline_pipelines_with_incorrect_tags_trigger_schedule = "15m"
+
+# config_rules_tag_rules = {}
+# config_rules_with_incorrect_tags_trigger_enabled = false
+# config_rules_with_incorrect_tags_trigger_schedule = "15m"
+
+# directory_service_directories_tag_rules = {}
+# directory_service_directories_with_incorrect_tags_trigger_enabled = false
+# directory_service_directories_with_incorrect_tags_trigger_schedule = "15m"
+
+# dms_replication_instances_tag_rules = {}
+# dms_replication_instances_with_incorrect_tags_trigger_enabled = false
+# dms_replication_instances_with_incorrect_tags_trigger_schedule = "15m"
+
+# dynamodb_tables_tag_rules = {}
+# dynamodb_tables_with_incorrect_tags_trigger_enabled = false
+# dynamodb_tables_with_incorrect_tags_trigger_schedule = "15m"
+
+# ebs_snapshots_tag_rules = {}
+# ebs_snapshots_with_incorrect_tags_trigger_enabled = false
+# ebs_snapshots_with_incorrect_tags_trigger_schedule = "15m"
+
+# ebs_volumes_tag_rules = {}
+# ebs_volumes_with_incorrect_tags_trigger_enabled = false
+# ebs_volumes_with_incorrect_tags_trigger_schedule = "15m"
+
+# ec2_application_load_balancers_tag_rules = {}
+# ec2_application_load_balancers_with_incorrect_tags_trigger_enabled = false
+# ec2_application_load_balancers_with_incorrect_tags_trigger_schedule = "15m"
+
+# ec2_classic_load_balancers_tag_rules = {}
+# ec2_classic_load_balancers_with_incorrect_tags_trigger_enabled = false
+# ec2_classic_load_balancers_with_incorrect_tags_trigger_schedule = "15m"
+
+# ec2_gateway_load_balancers_tag_rules = {}
+# ec2_gateway_load_balancers_with_incorrect_tags_trigger_enabled = false
+# ec2_gateway_load_balancers_with_incorrect_tags_trigger_schedule = "15m"
+
+# ec2_instances_tag_rules = {}
+# ec2_instances_with_incorrect_tags_trigger_enabled = false
+# ec2_instances_with_incorrect_tags_trigger_schedule = "15m"
+
+# ec2_network_load_balancers_tag_rules = {}
+# ec2_network_load_balancers_with_incorrect_tags_trigger_enabled = false
+# ec2_network_load_balancers_with_incorrect_tags_trigger_schedule = "15m"
+
+# ec2_reserved_instances_tag_rules = {}
+# ec2_reserved_instances_with_incorrect_tags_trigger_enabled = false
+# ec2_reserved_instances_with_incorrect_tags_trigger_schedule = "15m"
+
+# ecr_repositories_tag_rules = {}
+# ecr_repositories_with_incorrect_tags_trigger_enabled = false
+# ecr_repositories_with_incorrect_tags_trigger_schedule = "15m"
+
+# ecs_container_instances_tag_rules = {}
+# ecs_container_instances_with_incorrect_tags_trigger_enabled = false
+# ecs_container_instances_with_incorrect_tags_trigger_schedule = "15m"
+
+# ecs_services_tag_rules = {}
+# ecs_services_with_incorrect_tags_trigger_enabled = false
+# ecs_services_with_incorrect_tags_trigger_schedule = "15m"
+
+# efs_file_systems_tag_rules = {}
+# efs_file_systems_with_incorrect_tags_trigger_enabled = false
+# efs_file_systems_with_incorrect_tags_trigger_schedule = "15m"
+
+# eks_addons_tag_rules = {}
+# eks_addons_with_incorrect_tags_trigger_enabled = false
+# eks_addons_with_incorrect_tags_trigger_schedule = "15m"
+
+# eks_clusters_tag_rules = {}
+# eks_clusters_with_incorrect_tags_trigger_enabled = false
+# eks_clusters_with_incorrect_tags_trigger_schedule = "15m"
+
+# eks_identity_provider_configs_tag_rules = {}
+# eks_identity_provider_configs_with_incorrect_tags_trigger_enabled = false
+# eks_identity_provider_configs_with_incorrect_tags_trigger_schedule = "15m"
+
+# elastic_beanstalk_applications_tag_rules = {}
+# elastic_beanstalk_applications_with_incorrect_tags_trigger_enabled = false
+# elastic_beanstalk_applications_with_incorrect_tags_trigger_schedule = "15m"
+
+# elastic_beanstalk_environments_tag_rules = {}
+# elastic_beanstalk_environments_with_incorrect_tags_trigger_enabled = false
+# elastic_beanstalk_environments_with_incorrect_tags_trigger_schedule = "15m"
+
+# elasticache_clusters_tag_rules = {}
+# elasticache_clusters_with_incorrect_tags_trigger_enabled = false
+# elasticache_clusters_with_incorrect_tags_trigger_schedule = "15m"
+
+# elasticsearch_domains_tag_rules = {}
+# elasticsearch_domains_with_incorrect_tags_trigger_enabled = false
+# elasticsearch_domains_with_incorrect_tags_trigger_schedule = "15m"
+
+# eventbridge_rules_tag_rules = {}
+# eventbridge_rules_with_incorrect_tags_trigger_enabled = false
+# eventbridge_rules_with_incorrect_tags_trigger_schedule = "15m"
+
+# guardduty_detectors_tag_rules = {}
+# guardduty_detectors_with_incorrect_tags_trigger_enabled = false
+# guardduty_detectors_with_incorrect_tags_trigger_schedule = "15m"
+
+# iam_roles_tag_rules = {}
+# iam_roles_with_incorrect_tags_trigger_enabled = false
+# iam_roles_with_incorrect_tags_trigger_schedule = "15m"
+
+# iam_server_certificates_tag_rules = {}
+# iam_server_certificates_with_incorrect_tags_trigger_enabled = false
+# iam_server_certificates_with_incorrect_tags_trigger_schedule = "15m"
+
+# iam_users_tag_rules = {}
+# iam_users_with_incorrect_tags_trigger_enabled = false
+# iam_users_with_incorrect_tags_trigger_schedule = "15m"
+
+# inspector_assessment_templates_tag_rules = {}
+# inspector_assessment_templates_with_incorrect_tags_trigger_enabled = false
+# inspector_assessment_templates_with_incorrect_tags_trigger_schedule = "15m"
+
+# kinesis_firehose_delivery_streams_tag_rules = {}
+# kinesis_firehose_delivery_streams_with_incorrect_tags_trigger_enabled = false
+# kinesis_firehose_delivery_streams_with_incorrect_tags_trigger_schedule = "15m"
+
+# kms_keys_tag_rules = {}
+# kms_keys_with_incorrect_tags_trigger_enabled = false
+# kms_keys_with_incorrect_tags_trigger_schedule = "15m"
+
+# lambda_functions_tag_rules = {}
+# lambda_functions_with_incorrect_tags_trigger_enabled = false
+# lambda_functions_with_incorrect_tags_trigger_schedule = "15m"
+
+# rds_db_cluster_parameter_groups_tag_rules = {}
+# rds_db_cluster_parameter_groups_with_incorrect_tags_trigger_enabled = false
+# rds_db_cluster_parameter_groups_with_incorrect_tags_trigger_schedule = "15m"
+
+# rds_db_cluster_snapshots_tag_rules = {}
+# rds_db_cluster_snapshots_with_incorrect_tags_trigger_enabled = false
+# rds_db_cluster_snapshots_with_incorrect_tags_trigger_schedule = "15m"
+
+# rds_db_clusters_tag_rules = {}
+# rds_db_clusters_with_incorrect_tags_trigger_enabled = false
+# rds_db_clusters_with_incorrect_tags_trigger_schedule = "15m"
+
+# rds_db_instances_tag_rules = {}
+# rds_db_instances_with_incorrect_tags_trigger_enabled = false
+# rds_db_instances_with_incorrect_tags_trigger_schedule = "15m"
+
+# rds_db_option_groups_tag_rules = {}
+# rds_db_option_groups_with_incorrect_tags_trigger_enabled = false
+# rds_db_option_groups_with_incorrect_tags_trigger_schedule = "15m"
+
+# rds_db_parameter_groups_tag_rules = {}
+# rds_db_parameter_groups_with_incorrect_tags_trigger_enabled = false
+# rds_db_parameter_groups_with_incorrect_tags_trigger_schedule = "15m"
+
+# rds_db_snapshots_tag_rules = {}
+# rds_db_snapshots_with_incorrect_tags_trigger_enabled = false
+# rds_db_snapshots_with_incorrect_tags_trigger_schedule = "15m"
+
+# rds_db_subnet_groups_tag_rules = {}
+# rds_db_subnet_groups_with_incorrect_tags_trigger_enabled = false
+# rds_db_subnet_groups_with_incorrect_tags_trigger_schedule = "15m"
+
+# redshift_clusters_tag_rules = {}
+# redshift_clusters_with_incorrect_tags_trigger_enabled = false
+# redshift_clusters_with_incorrect_tags_trigger_schedule = "15m"
+
+# route53_domains_tag_rules = {}
+# route53_domains_with_incorrect_tags_trigger_enabled = false
+# route53_domains_with_incorrect_tags_trigger_schedule = "15m"
+
+# route53_resolver_endpoints_tag_rules = {}
+# route53_resolver_endpoints_with_incorrect_tags_trigger_enabled = false
+# route53_resolver_endpoints_with_incorrect_tags_trigger_schedule = "15m"
+
+# s3_buckets_tag_rules = {}
+# s3_buckets_with_incorrect_tags_trigger_enabled = false
+# s3_buckets_with_incorrect_tags_trigger_schedule = "15m"
+
+# sagemaker_endpoint_configurations_tag_rules = {}
+# sagemaker_endpoint_configurations_with_incorrect_tags_trigger_enabled = false
+# sagemaker_endpoint_configurations_with_incorrect_tags_trigger_schedule = "15m"
+
+# sagemaker_models_tag_rules = {}
+# sagemaker_models_with_incorrect_tags_trigger_enabled = false
+# sagemaker_models_with_incorrect_tags_trigger_schedule = "15m"
+
+# sagemaker_notebook_instances_tag_rules = {}
+# sagemaker_notebook_instances_with_incorrect_tags_trigger_enabled = false
+# sagemaker_notebook_instances_with_incorrect_tags_trigger_schedule = "15m"
+
+# sagemaker_training_jobs_tag_rules = {}
+# sagemaker_training_jobs_with_incorrect_tags_trigger_enabled = false
+# sagemaker_training_jobs_with_incorrect_tags_trigger_schedule = "15m"
+
+# secrets_manager_secrets_with_incorrect_tags_trigger_enabled = false
+# secrets_manager_secrets_with_incorrect_tags_trigger_schedule = "15m"
+# secretsmanager_secrets_tag_rules = {}
+
+# vpc_eip_tag_rules = {}
+# vpc_eip_with_incorrect_tags_trigger_enabled = false
+# vpc_eip_with_incorrect_tags_trigger_schedule = "15m"
+
+# vpc_nat_gateways_tag_rules = {}
+# vpc_nat_gateways_with_incorrect_tags_trigger_enabled = false
+# vpc_nat_gateways_with_incorrect_tags_trigger_schedule = "15m"
+
+# vpc_network_acls_tag_rules = {}
+# vpc_network_acls_with_incorrect_tags_trigger_enabled = false
+# vpc_network_acls_with_incorrect_tags_trigger_schedule = "15m"
+
+# vpc_security_groups_tag_rules = {}
+# vpc_security_groups_with_incorrect_tags_trigger_enabled = false
+# vpc_security_groups_with_incorrect_tags_trigger_schedule = "15m"
+
+# vpc_vpn_connections_tag_rules = {}
+# vpc_vpn_connections_with_incorrect_tags_trigger_enabled = false
+# vpc_vpn_connections_with_incorrect_tags_trigger_schedule = "15m"
+
+# vpc_tag_rules = {}
+# vpc_with_incorrect_tags_trigger_enabled = false
+# vpc_with_incorrect_tags_trigger_schedule = "15m"
+
+# wafv2_ip_set_tag_rules = {}
+# wafv2_ip_set_with_incorrect_tags_trigger_enabled = false
+# wafv2_ip_set_with_incorrect_tags_trigger_schedule = "15m"
+
+# wafv2_ip_sets_tag_rules = {}
+# wafv2_ip_sets_with_incorrect_tags_trigger_enabled = false
+# wafv2_ip_sets_with_incorrect_tags_trigger_schedule = "15m"
+
+# wafv2_regex_pattern_sets_tag_rules = {}
+# wafv2_regex_pattern_sets_with_incorrect_tags_trigger_enabled = false
+# wafv2_regex_pattern_sets_with_incorrect_tags_trigger_schedule = "15m"
+
+# wafv2_regex_pattern_tag_rules = {}
+# wafv2_regex_pattern_with_incorrect_tags_trigger_enabled = false
+# wafv2_regex_pattern_with_incorrect_tags_trigger_schedule = "15m"
+
+# wafv2_rule_group_tag_rules = {}
+# wafv2_rule_group_with_incorrect_tags_trigger_enabled = false
+# wafv2_rule_group_with_incorrect_tags_trigger_schedule = "15m"
+
+# wafv2_rule_groups_tag_rules = {}
+# wafv2_rule_groups_with_incorrect_tags_trigger_enabled = false
+# wafv2_rule_groups_with_incorrect_tags_trigger_schedule = "15m"
+
+# wafv2_web_acl_tag_rules = {}
+# wafv2_web_acl_with_incorrect_tags_trigger_enabled = false
+# wafv2_web_acl_with_incorrect_tags_trigger_schedule = "15m"
+
+# wafv2_web_acls_tag_rules = {}
+# wafv2_web_acls_with_incorrect_tags_trigger_enabled = false
+# wafv2_web_acls_with_incorrect_tags_trigger_schedule = "15m"

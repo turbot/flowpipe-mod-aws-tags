@@ -1,7 +1,6 @@
 pipeline "correct_resources_with_incorrect_tags" {
   title         = "Correct resources with incorrect tags"
-  description   = "" // TODO: Add Description
-  documentation = "" // TODO: Add Documentation
+  description   = "Corrects resources with incorrect tags"
 
   param "items" {
     type = list(object({
@@ -62,8 +61,7 @@ pipeline "correct_resources_with_incorrect_tags" {
 
 pipeline "correct_one_resource_with_incorrect_tags" {
   title         = "Correct one resource with incorrect tags"
-  description   = "" // TODO: Add description
-  documentation = "" // TODO: Add documentation
+  description   = "Corrects one resource with incorrect tags"
 
   param "title" {
     type        = string
@@ -92,12 +90,12 @@ pipeline "correct_one_resource_with_incorrect_tags" {
 
   param "remove" {
     type        = list(string)
-    description = "" // TODO: Add description
+    description = "List of tag keys to remove from the resource"
   }
 
   param "upsert" {
     type        = map(string)
-    description = "" // TODO: Add description
+    description = "Map of tag keys and values to add or update on the resource"
   }
 
   param "notifier" {
