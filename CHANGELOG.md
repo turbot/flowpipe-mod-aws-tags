@@ -1,3 +1,9 @@
+## v0.2.0 [2024-08-21]
+
+_What's new?_
+
+- Added a default value for the `base_tag_rules` variable. ([#28](https://github.com/turbot/flowpipe-mod-aws-tags/pull/28))
+
 ## v0.1.0 [2024-07-24]
 
 _What's new?_
