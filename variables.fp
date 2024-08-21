@@ -43,4 +43,11 @@ variable "base_tag_rules" {
     update_values = optional(map(map(list(string))))
   })
   description = "Base rules to apply to resources unless overridden when merged with any provided resource-specific rules."
+  default     = {
+    add           = {}
+    remove        = []
+    remove_except = []
+    update_keys   = {}
+    update_values = {}
+  }
 }
