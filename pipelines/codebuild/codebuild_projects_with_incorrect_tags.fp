@@ -19,7 +19,7 @@ trigger "query" "detect_and_correct_codebuild_projects_with_incorrect_tags" {
 pipeline "detect_and_correct_codebuild_projects_with_incorrect_tags" {
   title         = "Detect & correct CodeBuild projects with incorrect tags"
   description   = "Detects CodeBuild projects with incorrect tags and optionally attempts to correct them."
-  tags          = merge(local.codebuild_common_tags, { type = "featured" })
+  tags          = merge(local.codebuild_common_tags, { type = "recommended" })
 
   param "database" {
     type        = string

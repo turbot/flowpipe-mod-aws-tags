@@ -19,7 +19,7 @@ trigger "query" "detect_and_correct_ecs_container_instances_with_incorrect_tags"
 pipeline "detect_and_correct_ecs_container_instances_with_incorrect_tags" {
   title         = "Detect & correct ECS container instances with incorrect tags"
   description   = "Detects ECS container instances with incorrect tags and optionally attempts to correct them."
-  tags          = merge(local.ecs_common_tags, { type = "featured" })
+  tags          = merge(local.ecs_common_tags, { type = "recommended" })
 
   param "database" {
     type        = string

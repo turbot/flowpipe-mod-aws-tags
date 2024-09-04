@@ -19,7 +19,7 @@ trigger "query" "detect_and_correct_dms_replication_instances_with_incorrect_tag
 pipeline "detect_and_correct_dms_replication_instances_with_incorrect_tags" {
   title       = "Detect & correct DMS replication instances with incorrect tags"
   description = "Detects DMS replication instances with incorrect tags and optionally attempts to correct them."
-  tags        = merge(local.dms_common_tags, { type = "featured" })
+  tags        = merge(local.dms_common_tags, { type = "recommended" })
 
   param "database" {
     type        = string
@@ -78,18 +78,27 @@ variable "dms_replication_instances_tag_rules" {
   })
   description = "DMS Replication Instance specific tag rules"
   default     = null
+  tags = {
+    folder = "Advanced/DMS"
+  }
 }
 
 variable "dms_replication_instances_with_incorrect_tags_trigger_enabled" {
   type        = bool
   default     = false
   description = "If true, the trigger is enabled."
+  tags = {
+    folder = "Advanced/DMS"
+  }
 }
 
 variable "dms_replication_instances_with_incorrect_tags_trigger_schedule" {
   type        = string
   default     = "15m"
   description = "The schedule on which to run the trigger if enabled."
+  tags = {
+    folder = "Advanced/DMS"
+  }
 }
 
 locals {

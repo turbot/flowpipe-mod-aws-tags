@@ -19,7 +19,7 @@
 // pipeline "detect_and_correct_dax_clusters_with_incorrect_tags" {
 //   title         = "Detect & correct DAX clusters with incorrect tags"
 //   description   = "Detects DAX clusters with incorrect tags and optionally attempts to correct them."
-//   tags          = merge(local.dax_common_tags, { type = "featured" })
+//   tags          = merge(local.dax_common_tags, { type = "recommended" })
 
 //   param "database" {
 //     type        = string

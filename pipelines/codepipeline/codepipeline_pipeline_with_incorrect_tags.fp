@@ -19,7 +19,7 @@ trigger "query" "detect_and_correct_codepipeline_pipelines_with_incorrect_tags" 
 pipeline "detect_and_correct_codepipeline_pipelines_with_incorrect_tags" {
   title         = "Detect & correct CodePipeline pipelines with incorrect tags"
   description   = "Detects CodePipeline pipelines with incorrect tags and optionally attempts to correct them."
-  tags          = merge(local.codepipeline_common_tags, { type = "featured" })
+  tags          = merge(local.codepipeline_common_tags, { type = "recommended" })
 
   param "database" {
     type        = string

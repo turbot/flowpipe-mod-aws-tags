@@ -19,7 +19,7 @@ trigger "query" "detect_and_correct_redshift_clusters_with_incorrect_tags" {
 pipeline "detect_and_correct_redshift_clusters_with_incorrect_tags" {
   title       = "Detect & correct Redshift clusters with incorrect tags"
   description = "Detects Redshift clusters with incorrect tags and optionally attempts to correct them."
-  tags        = merge(local.redshift_common_tags, { type = "featured" })
+  tags        = merge(local.redshift_common_tags, { type = "recommended" })
 
   param "database" {
     type        = string

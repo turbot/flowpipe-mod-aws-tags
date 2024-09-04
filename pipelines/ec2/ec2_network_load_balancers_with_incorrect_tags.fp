@@ -19,7 +19,7 @@ trigger "query" "detect_and_correct_ec2_network_load_balancers_with_incorrect_ta
 pipeline "detect_and_correct_ec2_network_load_balancers_with_incorrect_tags" {
   title         = "Detect & correct EC2 network load balancers with incorrect tags"
   description   = "Detects EC2 network load balancers with incorrect tags and optionally attempts to correct them."
-  tags          = merge(local.ec2_common_tags, { type = "featured" })
+  tags          = merge(local.ec2_common_tags, { type = "recommended" })
 
   param "database" {
     type        = string

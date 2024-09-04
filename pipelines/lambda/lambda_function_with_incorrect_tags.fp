@@ -19,7 +19,7 @@ trigger "query" "detect_and_correct_lambda_functions_with_incorrect_tags" {
 pipeline "detect_and_correct_lambda_functions_with_incorrect_tags" {
   title         = "Detect & correct Lambda functions with incorrect tags"
   description   = "Detects Lambda functions with incorrect tags and optionally attempts to correct them."
-  tags          = merge(local.lambda_common_tags, { type = "featured" })
+  tags          = merge(local.lambda_common_tags, { type = "recommended" })
 
   param "database" {
     type        = string

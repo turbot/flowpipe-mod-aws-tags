@@ -19,7 +19,7 @@ trigger "query" "detect_and_correct_cloudwatch_alarms_with_incorrect_tags" {
 pipeline "detect_and_correct_cloudwatch_alarms_with_incorrect_tags" {
   title         = "Detect & correct CloudWatch alarms with incorrect tags"
   description   = "Detects CloudWatch alarms with incorrect tags and optionally attempts to correct them."
-  tags          = merge(local.cloudwatch_common_tags, { type = "featured" })
+  tags          = merge(local.cloudwatch_common_tags, { type = "recommended" })
 
   param "database" {
     type        = string

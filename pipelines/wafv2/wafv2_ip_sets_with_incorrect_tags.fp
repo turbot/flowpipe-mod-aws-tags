@@ -19,7 +19,7 @@ trigger "query" "detect_and_correct_wafv2_ip_sets_with_incorrect_tags" {
 pipeline "detect_and_correct_wafv2_ip_sets_with_incorrect_tags" {
   title         = "Detect & correct WAFV2 IP Sets with incorrect tags"
   description   = "Detects WAFV2 IP Sets with incorrect tags and optionally attempts to correct them."
-  tags          = merge(local.wafv2_common_tags, { type = "featured" })
+  tags          = merge(local.wafv2_common_tags, { type = "recommended" })
 
   param "database" {
     type        = string

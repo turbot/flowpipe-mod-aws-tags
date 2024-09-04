@@ -19,7 +19,7 @@ trigger "query" "detect_and_correct_vpc_vpn_connections_with_incorrect_tags" {
 pipeline "detect_and_correct_vpc_vpn_connections_with_incorrect_tags" {
   title         = "Detect & correct VPC VPN Connections with incorrect tags"
   description   = "Detects VPC VPN Connections with incorrect tags and optionally attempts to correct them."
-  tags          = merge(local.vpc_common_tags, { type = "featured" })
+  tags          = merge(local.vpc_common_tags, { type = "recommended" })
 
   param "database" {
     type        = string

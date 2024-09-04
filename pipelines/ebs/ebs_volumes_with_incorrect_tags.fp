@@ -19,7 +19,7 @@ trigger "query" "detect_and_correct_ebs_volumes_with_incorrect_tags" {
 pipeline "detect_and_correct_ebs_volumes_with_incorrect_tags" {
   title         = "Detect & correct EBS volumes with incorrect tags"
   description   = "Detects EBS volumes with incorrect tags and optionally attempts to correct them."
-  tags          = merge(local.ebs_common_tags, { type = "featured" })
+  tags          = merge(local.ebs_common_tags, { type = "recommended" })
 
   param "database" {
     type        = string

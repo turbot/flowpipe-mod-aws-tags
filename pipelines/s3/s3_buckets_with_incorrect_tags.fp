@@ -19,7 +19,7 @@ trigger "query" "detect_and_correct_s3_buckets_with_incorrect_tags" {
 pipeline "detect_and_correct_s3_buckets_with_incorrect_tags" {
   title         = "Detect & correct S3 buckets with incorrect tags"
   description   = "Detects S3 buckets with incorrect tags and optionally attempts to correct them."
-  tags          = merge(local.s3_common_tags, { type = "featured" })
+  tags          = merge(local.s3_common_tags, { type = "recommended" })
 
   param "database" {
     type        = string

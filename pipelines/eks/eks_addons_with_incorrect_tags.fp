@@ -19,7 +19,7 @@ trigger "query" "detect_and_correct_eks_addons_with_incorrect_tags" {
 pipeline "detect_and_correct_eks_addons_with_incorrect_tags" {
   title         = "Detect & correct EKS addons with incorrect tags"
   description   = "Detects EKS addons with incorrect tags and optionally attempts to correct them."
-  tags          = merge(local.eks_common_tags, { type = "featured" })
+  tags          = merge(local.eks_common_tags, { type = "recommended" })
 
   param "database" {
     type        = string

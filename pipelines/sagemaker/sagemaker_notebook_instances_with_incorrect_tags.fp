@@ -19,7 +19,7 @@ trigger "query" "detect_and_correct_sagemaker_notebook_instances_with_incorrect_
 pipeline "detect_and_correct_sagemaker_notebook_instances_with_incorrect_tags" {
   title         = "Detect & correct SageMaker notebook instances with incorrect tags"
   description   = "Detects SageMaker notebook instances with incorrect tags and optionally attempts to correct them."
-  tags          = merge(local.sagemaker_common_tags, { type = "featured" })
+  tags          = merge(local.sagemaker_common_tags, { type = "recommended" })
 
   param "database" {
     type        = string

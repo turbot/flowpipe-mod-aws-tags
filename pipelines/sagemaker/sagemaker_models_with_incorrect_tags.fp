@@ -19,7 +19,7 @@ trigger "query" "detect_and_correct_sagemaker_models_with_incorrect_tags" {
 pipeline "detect_and_correct_sagemaker_models_with_incorrect_tags" {
   title         = "Detect & correct SageMaker models with incorrect tags"
   description   = "Detects SageMaker models with incorrect tags and optionally attempts to correct them."
-  tags          = merge(local.sagemaker_common_tags, { type = "featured" })
+  tags          = merge(local.sagemaker_common_tags, { type = "recommended" })
 
   param "database" {
     type        = string

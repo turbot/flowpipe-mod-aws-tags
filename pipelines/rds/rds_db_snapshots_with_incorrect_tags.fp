@@ -19,7 +19,7 @@ trigger "query" "detect_and_correct_rds_db_snapshots_with_incorrect_tags" {
 pipeline "detect_and_correct_rds_db_snapshots_with_incorrect_tags" {
   title       = "Detect & correct RDS DB snapshots with incorrect tags"
   description = "Detects RDS DB snapshots with incorrect tags and optionally attempts to correct them."
-  tags        = merge(local.rds_common_tags, { type = "featured" })
+  tags        = merge(local.rds_common_tags, { type = "recommended" })
 
   param "database" {
     type        = string

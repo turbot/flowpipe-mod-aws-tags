@@ -19,7 +19,7 @@ trigger "query" "detect_and_correct_elastic_beanstalk_environments_with_incorrec
 pipeline "detect_and_correct_elastic_beanstalk_environments_with_incorrect_tags" {
   title         = "Detect & correct Elastic Beanstalk environments with incorrect tags"
   description   = "Detects Elastic Beanstalk environments with incorrect tags and optionally attempts to correct them."
-  tags          = merge(local.elastic_beanstalk_common_tags, { type = "featured" })
+  tags          = merge(local.elastic_beanstalk_common_tags, { type = "recommended" })
 
   param "database" {
     type        = string

@@ -19,7 +19,7 @@ trigger "query" "detect_and_correct_access_analyzers_with_incorrect_tags" {
 pipeline "detect_and_correct_access_analyzers_with_incorrect_tags" {
   title         = "Detect & correct Access Analyzers with incorrect tags"
   description   = "Detects Access Analyzers with incorrect tags and optionally attempts to correct them."
-  tags          = merge(local.access_analyzer_common_tags, { type = "featured" })
+  tags          = merge(local.access_analyzer_common_tags, { type = "recommended" })
 
   param "database" {
     type        = string
@@ -27,7 +27,7 @@ pipeline "detect_and_correct_access_analyzers_with_incorrect_tags" {
     default     = var.database
   }
 
-  param "notifier" {
+  param "notifier" { 
     type        = string
     description = local.description_notifier
     default     = var.notifier

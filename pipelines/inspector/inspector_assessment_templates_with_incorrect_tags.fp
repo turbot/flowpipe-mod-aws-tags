@@ -19,7 +19,7 @@ trigger "query" "detect_and_correct_inspector_assessment_templates_with_incorrec
 pipeline "detect_and_correct_inspector_assessment_templates_with_incorrect_tags" {
   title         = "Detect & correct Inspector assessment templates with incorrect tags"
   description   = "Detects Inspector assessment templates with incorrect tags and optionally attempts to correct them."
-  tags          = merge(local.inspector_common_tags, { type = "featured" })
+  tags          = merge(local.inspector_common_tags, { type = "recommended" })
 
   param "database" {
     type        = string

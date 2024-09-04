@@ -19,7 +19,7 @@ trigger "query" "detect_and_correct_kinesis_firehose_delivery_streams_with_incor
 pipeline "detect_and_correct_kinesis_firehose_delivery_streams_with_incorrect_tags" {
   title         = "Detect & correct Kinesis firehose delivery streams with incorrect tags"
   description   = "Detects Kinesis firehose delivery streams with incorrect tags and optionally attempts to correct them."
-  tags          = merge(local.kinesis_common_tags, { type = "featured" })
+  tags          = merge(local.kinesis_common_tags, { type = "recommended" })
 
   param "database" {
     type        = string

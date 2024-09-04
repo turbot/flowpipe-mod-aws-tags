@@ -19,7 +19,7 @@ trigger "query" "detect_and_correct_secrets_manager_secrets_with_incorrect_tags"
 pipeline "detect_and_correct_secrets_manager_secrets_with_incorrect_tags" {
   title         = "Detect & correct Secrets Manager secrets with incorrect tags"
   description   = "Detects Secrets Manager secrets with incorrect tags and optionally attempts to correct them."
-  tags          = merge(local.secrets_manager_common_tags, { type = "featured" })
+  tags          = merge(local.secrets_manager_common_tags, { type = "recommended" })
 
   param "database" {
     type        = string

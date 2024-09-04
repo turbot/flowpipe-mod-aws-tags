@@ -19,7 +19,7 @@ trigger "query" "detect_and_correct_ecr_repositories_with_incorrect_tags" {
 pipeline "detect_and_correct_ecr_repositories_with_incorrect_tags" {
   title         = "Detect & correct ECR repositories with incorrect tags"
   description   = "Detects ECR repositories with incorrect tags and optionally attempts to correct them."
-  tags          = merge(local.ecr_common_tags, { type = "featured" })
+  tags          = merge(local.ecr_common_tags, { type = "recommended" })
 
   param "database" {
     type        = string

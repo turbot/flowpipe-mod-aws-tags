@@ -19,7 +19,7 @@ trigger "query" "detect_and_correct_eks_identity_provider_configs_with_incorrect
 pipeline "detect_and_correct_eks_identity_provider_configs_with_incorrect_tags" {
   title         = "Detect & correct EKS identity provider configs with incorrect tags"
   description   = "Detects EKS identity provider configs with incorrect tags and optionally attempts to correct them."
-  tags          = merge(local.eks_common_tags, { type = "featured" })
+  tags          = merge(local.eks_common_tags, { type = "recommended" })
 
   param "database" {
     type        = string

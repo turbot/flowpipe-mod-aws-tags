@@ -19,7 +19,7 @@ trigger "query" "detect_and_correct_directory_service_directories_with_incorrect
 pipeline "detect_and_correct_directory_service_directories_with_incorrect_tags" {
   title         = "Detect & correct Directory Service directories with incorrect tags"
   description   = "Detects Directory Service directories with incorrect tags and optionally attempts to correct them."
-  tags          = merge(local.directory_service_common_tags, { type = "featured" })
+  tags          = merge(local.directory_service_common_tags, { type = "recommended" })
 
   param "database" {
     type        = string

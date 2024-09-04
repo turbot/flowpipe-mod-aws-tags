@@ -19,7 +19,7 @@ trigger "query" "detect_and_correct_cloudfront_distributions_with_incorrect_tags
 pipeline "detect_and_correct_cloudfront_distributions_with_incorrect_tags" {
   title         = "Detect & correct CloudFront distributions with incorrect tags"
   description   = "Detects CloudFront distributions with incorrect tags and optionally attempts to correct them."
-  tags          = merge(local.cloudfront_common_tags, { type = "featured" })
+  tags          = merge(local.cloudfront_common_tags, { type = "recommended" })
 
   param "database" {
     type        = string
