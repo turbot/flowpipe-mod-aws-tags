@@ -78,18 +78,27 @@ variable "wafv2_web_acl_tag_rules" {
   })
   description = "WAFV2 Web ACL specific tag rules"
   default     = null
+  tags = {
+    folder = "Advanced/WAFV2"
+  }
 }
 
 variable "wafv2_web_acl_with_incorrect_tags_trigger_enabled" {
   type        = bool
   default     = false
   description = "If true, the trigger is enabled."
+  tags = {
+    folder = "Advanced/WAFV2"
+  }
 }
 
 variable "wafv2_web_acl_with_incorrect_tags_trigger_schedule" {
   type        = string
   default     = "15m"
   description = "The schedule on which to run the trigger if enabled."
+  tags = {
+    folder = "Advanced/WAFV2"
+  }
 }
 
 locals {

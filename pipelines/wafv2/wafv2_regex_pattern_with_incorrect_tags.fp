@@ -78,18 +78,27 @@ variable "wafv2_regex_pattern_tag_rules" {
   })
   description = "WAFV2 Regex Pattern specific tag rules"
   default     = null
+  tags = {
+    folder = "Advanced/WAFV2"
+  }
 }
 
 variable "wafv2_regex_pattern_with_incorrect_tags_trigger_enabled" {
   type        = bool
   default     = false
   description = "If true, the trigger is enabled."
+  tags = {
+    folder = "Advanced/WAFV2"
+  }
 }
 
 variable "wafv2_regex_pattern_with_incorrect_tags_trigger_schedule" {
   type        = string
   default     = "15m"
   description = "The schedule on which to run the trigger if enabled."
+  tags = {
+    folder = "Advanced/WAFV2"
+  }
 }
 
 locals {

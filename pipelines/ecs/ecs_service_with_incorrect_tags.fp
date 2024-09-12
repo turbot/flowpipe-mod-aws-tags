@@ -78,18 +78,27 @@ variable "ecs_services_tag_rules" {
   })
   description = "ECS Service specific tag rules"
   default     = null
+  tags = {
+    folder = "Advanced/ECS"
+  }
 }
 
 variable "ecs_services_with_incorrect_tags_trigger_enabled" {
   type        = bool
   default     = false
   description = "If true, the trigger is enabled."
+  tags = {
+    folder = "Advanced/ECS"
+  }
 }
 
 variable "ecs_services_with_incorrect_tags_trigger_schedule" {
   type        = string
   default     = "15m"
   description = "The schedule on which to run the trigger if enabled."
+  tags = {
+    folder = "Advanced/ECS"
+  }
 }
 
 locals {

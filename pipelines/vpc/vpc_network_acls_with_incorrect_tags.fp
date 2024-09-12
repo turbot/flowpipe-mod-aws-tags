@@ -78,18 +78,27 @@ variable "vpc_network_acls_tag_rules" {
   })
   description = "VPC Network ACL specific tag rules"
   default     = null
+  tags = {
+    folder = "Advanced/VPC"
+  }
 }
 
 variable "vpc_network_acls_with_incorrect_tags_trigger_enabled" {
   type        = bool
   default     = false
   description = "If true, the trigger is enabled."
+  tags = {
+    folder = "Advanced/VPC"
+  }
 }
 
 variable "vpc_network_acls_with_incorrect_tags_trigger_schedule" {
   type        = string
   default     = "15m"
   description = "The schedule on which to run the trigger if enabled."
+  tags = {
+    folder = "Advanced/VPC"
+  }
 }
 
 locals {

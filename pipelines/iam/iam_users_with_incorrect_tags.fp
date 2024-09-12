@@ -78,18 +78,27 @@ variable "iam_users_tag_rules" {
   })
   description = "IAM User specific tag rules"
   default     = null
+  tags = {
+    folder = "Advanced/IAM"
+  }
 }
 
 variable "iam_users_with_incorrect_tags_trigger_enabled" {
   type        = bool
   default     = false
   description = "If true, the trigger is enabled."
+  tags = {
+    folder = "Advanced/IAM"
+  }
 }
 
 variable "iam_users_with_incorrect_tags_trigger_schedule" {
   type        = string
   default     = "15m"
   description = "The schedule on which to run the trigger if enabled."
+  tags = {
+    folder = "Advanced/IAM"
+  }
 }
 
 locals {

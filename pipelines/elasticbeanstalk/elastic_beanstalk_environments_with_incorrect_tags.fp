@@ -78,18 +78,27 @@ variable "elastic_beanstalk_environments_tag_rules" {
   })
   description = "Elastic Beanstalk Environment specific tag rules"
   default     = null
+  tags = {
+    folder = "Advanced/ElasticBeanstalk"
+  }
 }
 
 variable "elastic_beanstalk_environments_with_incorrect_tags_trigger_enabled" {
   type        = bool
   default     = false
   description = "If true, the trigger is enabled."
+  tags = {
+    folder = "Advanced/ElasticBeanstalk"
+  }
 }
 
 variable "elastic_beanstalk_environments_with_incorrect_tags_trigger_schedule" {
   type        = string
   default     = "15m"
   description = "The schedule on which to run the trigger if enabled."
+  tags = {
+    folder = "Advanced/ElasticBeanstalk"
+  }
 }
 
 locals {

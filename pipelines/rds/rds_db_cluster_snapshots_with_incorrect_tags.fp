@@ -78,18 +78,27 @@ variable "rds_db_cluster_snapshots_tag_rules" {
   })
   description = "RDS DB Cluster Snapshot specific tag rules"
   default     = null
+  tags = {
+    folder = "Advanced/RDS"
+  }
 }
 
 variable "rds_db_cluster_snapshots_with_incorrect_tags_trigger_enabled" {
   type        = bool
   default     = false
   description = "If true, the trigger is enabled."
+  tags = {
+    folder = "Advanced/RDS"
+  }
 }
 
 variable "rds_db_cluster_snapshots_with_incorrect_tags_trigger_schedule" {
   type        = string
   default     = "15m"
   description = "The schedule on which to run the trigger if enabled."
+  tags = {
+    folder = "Advanced/RDS"
+  }
 }
 
 locals {

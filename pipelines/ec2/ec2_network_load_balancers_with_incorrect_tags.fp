@@ -78,18 +78,27 @@ variable "ec2_network_load_balancers_tag_rules" {
   })
   description = "EC2 Network Load Balancer specific tag rules"
   default     = null
+  tags = {
+    folder = "Advanced/EC2"
+  }
 }
 
 variable "ec2_network_load_balancers_with_incorrect_tags_trigger_enabled" {
   type        = bool
   default     = false
   description = "If true, the trigger is enabled."
+  tags = {
+    folder = "Advanced/EC2"
+  }
 }
 
 variable "ec2_network_load_balancers_with_incorrect_tags_trigger_schedule" {
   type        = string
   default     = "15m"
   description = "The schedule on which to run the trigger if enabled."
+  tags = {
+    folder = "Advanced/EC2"
+  }
 }
 
 locals {

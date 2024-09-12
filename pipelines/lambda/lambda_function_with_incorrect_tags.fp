@@ -78,18 +78,27 @@ variable "lambda_functions_tag_rules" {
   })
   description = "Lambda Function specific tag rules"
   default     = null
+  tags = {
+    folder = "Advanced/Lambda"
+  }
 }
 
 variable "lambda_functions_with_incorrect_tags_trigger_enabled" {
   type        = bool
   default     = false
   description = "If true, the trigger is enabled."
+  tags = {
+    folder = "Advanced/Lambda"
+  }
 }
 
 variable "lambda_functions_with_incorrect_tags_trigger_schedule" {
   type        = string
   default     = "15m"
   description = "The schedule on which to run the trigger if enabled."
+  tags = {
+    folder = "Advanced/Lambda"
+  }
 }
 
 locals {

@@ -78,18 +78,27 @@ variable "kms_keys_tag_rules" {
   })
   description = "KMS Key specific tag rules"
   default     = null
+  tags = {
+    folder = "Advanced/KMS"
+  }
 }
 
 variable "kms_keys_with_incorrect_tags_trigger_enabled" {
   type        = bool
   default     = false
   description = "If true, the trigger is enabled."
+  tags = {
+    folder = "Advanced/KMS"
+  }
 }
 
 variable "kms_keys_with_incorrect_tags_trigger_schedule" {
   type        = string
   default     = "15m"
   description = "The schedule on which to run the trigger if enabled."
+  tags = {
+    folder = "Advanced/KMS"
+  }
 }
 
 locals {

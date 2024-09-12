@@ -78,18 +78,27 @@ variable "eks_identity_provider_configs_tag_rules" {
   })
   description = "EKS identity provider configs specific tag rules"
   default     = null
+  tags = {
+    folder = "Advanced/EKS"
+  }
 }
 
 variable "eks_identity_provider_configs_with_incorrect_tags_trigger_enabled" {
   type        = bool
   default     = false
   description = "If true, the trigger is enabled."
+  tags = {
+    folder = "Advanced/EKS"
+  }
 }
 
 variable "eks_identity_provider_configs_with_incorrect_tags_trigger_schedule" {
   type        = string
   default     = "15m"
   description = "The schedule on which to run the trigger if enabled."
+  tags = {
+    folder = "Advanced/EKS"
+  }
 }
 
 locals {

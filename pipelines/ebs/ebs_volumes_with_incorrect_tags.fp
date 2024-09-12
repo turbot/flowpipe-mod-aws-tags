@@ -78,18 +78,27 @@ variable "ebs_volumes_tag_rules" {
   })
   description = "EBS Volume specific tag rules"
   default     = null
+    tags = {
+    folder = "Advanced/EBS"
+  }
 }
 
 variable "ebs_volumes_with_incorrect_tags_trigger_enabled" {
   type        = bool
   default     = false
   description = "If true, the trigger is enabled."
+    tags = {
+    folder = "Advanced/EBS"
+  }
 }
 
 variable "ebs_volumes_with_incorrect_tags_trigger_schedule" {
   type        = string
   default     = "15m"
   description = "The schedule on which to run the trigger if enabled."
+    tags = {
+    folder = "Advanced/EBS"
+  }
 }
 
 locals {
