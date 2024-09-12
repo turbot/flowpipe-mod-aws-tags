@@ -157,7 +157,7 @@ pipeline "correct_one_resource_with_incorrect_tags" {
           success_msg = ""
           error_msg   = ""
         }
-       "apply" = {
+        "apply" = {
           label        = "Apply"
           value        = "apply"
           style        = local.style_ok

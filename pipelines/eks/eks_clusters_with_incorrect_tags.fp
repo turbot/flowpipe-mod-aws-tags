@@ -19,7 +19,7 @@ trigger "query" "detect_and_correct_eks_clusters_with_incorrect_tags" {
 pipeline "detect_and_correct_eks_clusters_with_incorrect_tags" {
   title         = "Detect & correct EKS clusters with incorrect tags"
   description   = "Detects EKS clusters with incorrect tags and optionally attempts to correct them."
-  tags          = merge(local.eks_common_tags, { type = "featured" })
+  tags          = merge(local.eks_common_tags, { type = "recommended" })
 
   param "database" {
     type        = string
@@ -78,18 +78,27 @@ variable "eks_clusters_tag_rules" {
   })
   description = "EKS Cluster specific tag rules"
   default     = null
+  tags = {
+    folder = "Advanced/EKS"
+  }
 }
 
 variable "eks_clusters_with_incorrect_tags_trigger_enabled" {
   type        = bool
   default     = false
   description = "If true, the trigger is enabled."
+  tags = {
+    folder = "Advanced/EKS"
+  }
 }
 
 variable "eks_clusters_with_incorrect_tags_trigger_schedule" {
   type        = string
   default     = "15m"
   description = "The schedule on which to run the trigger if enabled."
+  tags = {
+    folder = "Advanced/EKS"
+  }
 }
 
 locals {

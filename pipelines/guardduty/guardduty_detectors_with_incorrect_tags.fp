@@ -19,7 +19,7 @@ trigger "query" "detect_and_correct_guardduty_detectors_with_incorrect_tags" {
 pipeline "detect_and_correct_guardduty_detectors_with_incorrect_tags" {
   title         = "Detect & correct GuardDuty detectors with incorrect tags"
   description   = "Detects GuardDuty detectors with incorrect tags and optionally attempts to correct them."
-  tags          = merge(local.guardduty_common_tags, { type = "featured" })
+  tags          = merge(local.guardduty_common_tags, { type = "recommended" })
 
   param "database" {
     type        = string
@@ -78,18 +78,27 @@ variable "guardduty_detectors_tag_rules" {
   })
   description = "GuardDuty Detector specific tag rules"
   default     = null
+  tags = {
+    folder = "Advanced/GuardDuty"
+  }
 }
 
 variable "guardduty_detectors_with_incorrect_tags_trigger_enabled" {
   type        = bool
   default     = false
   description = "If true, the trigger is enabled."
+  tags = {
+    folder = "Advanced/GuardDuty"
+  }
 }
 
 variable "guardduty_detectors_with_incorrect_tags_trigger_schedule" {
   type        = string
   default     = "15m"
   description = "The schedule on which to run the trigger if enabled."
+  tags = {
+    folder = "Advanced/GuardDuty"
+  }
 }
 
 locals {

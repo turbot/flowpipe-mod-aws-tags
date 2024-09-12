@@ -19,7 +19,7 @@ trigger "query" "detect_and_correct_codebuild_projects_with_incorrect_tags" {
 pipeline "detect_and_correct_codebuild_projects_with_incorrect_tags" {
   title         = "Detect & correct CodeBuild projects with incorrect tags"
   description   = "Detects CodeBuild projects with incorrect tags and optionally attempts to correct them."
-  tags          = merge(local.codebuild_common_tags, { type = "featured" })
+  tags          = merge(local.codebuild_common_tags, { type = "recommended" })
 
   param "database" {
     type        = string
@@ -78,18 +78,27 @@ variable "codebuild_projects_tag_rules" {
   })
   description = "CodeBuild Project specific tag rules"
   default     = null
+  tags = {
+    folder = "Advanced/CodeBuild"
+  }
 }
 
 variable "codebuild_projects_with_incorrect_tags_trigger_enabled" {
   type        = bool
   default     = false
   description = "If true, the trigger is enabled."
+  tags = {
+    folder = "Advanced/CodeBuild"
+  }
 }
 
 variable "codebuild_projects_with_incorrect_tags_trigger_schedule" {
   type        = string
   default     = "15m"
   description = "The schedule on which to run the trigger if enabled."
+  tags = {
+    folder = "Advanced/CodeBuild"
+  }
 }
 
 locals {

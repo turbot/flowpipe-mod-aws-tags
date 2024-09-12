@@ -19,7 +19,7 @@ trigger "query" "detect_and_correct_ec2_instances_with_incorrect_tags" {
 pipeline "detect_and_correct_ec2_instances_with_incorrect_tags" {
   title         = "Detect & correct EC2 instances with incorrect tags"
   description   = "Detects EC2 instances with incorrect tags and optionally attempts to correct them."
-  tags          = merge(local.ec2_common_tags, { type = "featured" })
+  tags          = merge(local.ec2_common_tags, { type = "recommended" })
 
   param "database" {
     type        = string
@@ -78,18 +78,27 @@ variable "ec2_instances_tag_rules" {
   })
   description = "EC2 Instance specific tag rules"
   default     = null
+  tags = {
+    folder = "Advanced/EC2"
+  }
 }
 
 variable "ec2_instances_with_incorrect_tags_trigger_enabled" {
   type        = bool
   default     = false
   description = "If true, the trigger is enabled."
+  tags = {
+    folder = "Advanced/EC2"
+  }
 }
 
 variable "ec2_instances_with_incorrect_tags_trigger_schedule" {
   type        = string
   default     = "15m"
   description = "The schedule on which to run the trigger if enabled."
+  tags = {
+    folder = "Advanced/EC2"
+  }
 }
 
 locals {

@@ -19,7 +19,7 @@ trigger "query" "detect_and_correct_inspector_assessment_templates_with_incorrec
 pipeline "detect_and_correct_inspector_assessment_templates_with_incorrect_tags" {
   title         = "Detect & correct Inspector assessment templates with incorrect tags"
   description   = "Detects Inspector assessment templates with incorrect tags and optionally attempts to correct them."
-  tags          = merge(local.inspector_common_tags, { type = "featured" })
+  tags          = merge(local.inspector_common_tags, { type = "recommended" })
 
   param "database" {
     type        = string
@@ -78,18 +78,27 @@ variable "inspector_assessment_templates_tag_rules" {
   })
   description = "Inspector Assessment Template specific tag rules"
   default     = null
+  tags = {
+    folder = "Advanced/Inspector"
+  }
 }
 
 variable "inspector_assessment_templates_with_incorrect_tags_trigger_enabled" {
   type        = bool
   default     = false
   description = "If true, the trigger is enabled."
+  tags = {
+    folder = "Advanced/Inspector"
+  }
 }
 
 variable "inspector_assessment_templates_with_incorrect_tags_trigger_schedule" {
   type        = string
   default     = "15m"
   description = "The schedule on which to run the trigger if enabled."
+  tags = {
+    folder = "Advanced/Inspector"
+  }
 }
 
 locals {

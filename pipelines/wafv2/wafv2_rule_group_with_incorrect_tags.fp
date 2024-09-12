@@ -19,7 +19,7 @@ trigger "query" "detect_and_correct_wafv2_rule_group_with_incorrect_tags" {
 pipeline "detect_and_correct_wafv2_rule_group_with_incorrect_tags" {
   title         = "Detect & correct WAFV2 rule groups with incorrect tags"
   description   = "Detects WAFV2 rule groups with incorrect tags and optionally attempts to correct them."
-  tags          = merge(local.wafv2_common_tags, { type = "featured" })
+  tags          = merge(local.wafv2_common_tags, { type = "recommended" })
 
   param "database" {
     type        = string
@@ -78,18 +78,27 @@ variable "wafv2_rule_group_tag_rules" {
   })
   description = "WAFV2 Rule Group specific tag rules"
   default     = null
+  tags = {
+    folder = "Advanced/WAFV2"
+  }
 }
 
 variable "wafv2_rule_group_with_incorrect_tags_trigger_enabled" {
   type        = bool
   default     = false
   description = "If true, the trigger is enabled."
+  tags = {
+    folder = "Advanced/WAFV2"
+  }
 }
 
 variable "wafv2_rule_group_with_incorrect_tags_trigger_schedule" {
   type        = string
   default     = "15m"
   description = "The schedule on which to run the trigger if enabled."
+  tags = {
+    folder = "Advanced/WAFV2"
+  }
 }
 
 locals {

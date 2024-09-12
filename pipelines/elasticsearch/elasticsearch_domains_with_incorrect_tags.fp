@@ -19,7 +19,7 @@ trigger "query" "detect_and_correct_elasticsearch_domains_with_incorrect_tags" {
 pipeline "detect_and_correct_elasticsearch_domains_with_incorrect_tags" {
   title         = "Detect & correct Elasticsearch domains with incorrect tags"
   description   = "Detects Elasticsearch domains with incorrect tags and optionally attempts to correct them."
-  tags          = merge(local.elasticsearch_common_tags, { type = "featured" })
+  tags          = merge(local.elasticsearch_common_tags, { type = "recommended" })
 
   param "database" {
     type        = string
@@ -78,18 +78,27 @@ variable "elasticsearch_domains_tag_rules" {
   })
   description = "Elasticsearch Domain specific tag rules"
   default     = null
+  tags = {
+    folder = "Advanced/Elasticsearch"
+  }
 }
 
 variable "elasticsearch_domains_with_incorrect_tags_trigger_enabled" {
   type        = bool
   default     = false
   description = "If true, the trigger is enabled."
+  tags = {
+    folder = "Advanced/Elasticsearch"
+  }
 }
 
 variable "elasticsearch_domains_with_incorrect_tags_trigger_schedule" {
   type        = string
   default     = "15m"
   description = "The schedule on which to run the trigger if enabled."
+  tags = {
+    folder = "Advanced/Elasticsearch"
+  }
 }
 
 locals {

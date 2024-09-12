@@ -19,7 +19,7 @@ trigger "query" "detect_and_correct_iam_roles_with_incorrect_tags" {
 pipeline "detect_and_correct_iam_roles_with_incorrect_tags" {
   title         = "Detect & correct IAM roles with incorrect tags"
   description   = "Detects IAM roles with incorrect tags and optionally attempts to correct them."
-  tags          = merge(local.iam_common_tags, { type = "featured" })
+  tags          = merge(local.iam_common_tags, { type = "recommended" })
 
   param "database" {
     type        = string
@@ -78,18 +78,27 @@ variable "iam_roles_tag_rules" {
   })
   description = "IAM Role specific tag rules"
   default     = null
+  tags = {
+    folder = "Advanced/IAM"
+  }
 }
 
 variable "iam_roles_with_incorrect_tags_trigger_enabled" {
   type        = bool
   default     = false
   description = "If true, the trigger is enabled."
+  tags = {
+    folder = "Advanced/IAM"
+  }
 }
 
 variable "iam_roles_with_incorrect_tags_trigger_schedule" {
   type        = string
   default     = "15m"
   description = "The schedule on which to run the trigger if enabled."
+  tags = {
+    folder = "Advanced/IAM"
+  }
 }
 
 locals {

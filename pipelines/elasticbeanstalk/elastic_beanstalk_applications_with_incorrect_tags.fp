@@ -19,7 +19,7 @@ trigger "query" "detect_and_correct_elastic_beanstalk_applications_with_incorrec
 pipeline "detect_and_correct_elastic_beanstalk_applications_with_incorrect_tags" {
   title         = "Detect & correct Elastic Beanstalk applications with incorrect tags"
   description   = "Detects Elastic Beanstalk applications with incorrect tags and optionally attempts to correct them."
-  tags          = merge(local.elastic_beanstalk_common_tags, { type = "featured" })
+  tags          = merge(local.elastic_beanstalk_common_tags, { type = "recommended" })
 
   param "database" {
     type        = string
@@ -78,18 +78,27 @@ variable "elastic_beanstalk_applications_tag_rules" {
   })
   description = "Elastic Beanstalk Application specific tag rules"
   default     = null
+  tags = {
+    folder = "Advanced/ElasticBeanstalk"
+  }
 }
 
 variable "elastic_beanstalk_applications_with_incorrect_tags_trigger_enabled" {
   type        = bool
   default     = false
   description = "If true, the trigger is enabled."
+  tags = {
+    folder = "Advanced/ElasticBeanstalk"
+  }
 }
 
 variable "elastic_beanstalk_applications_with_incorrect_tags_trigger_schedule" {
   type        = string
   default     = "15m"
   description = "The schedule on which to run the trigger if enabled."
+  tags = {
+    folder = "Advanced/ElasticBeanstalk"
+  }
 }
 
 locals {

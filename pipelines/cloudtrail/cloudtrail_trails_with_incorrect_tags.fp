@@ -21,7 +21,7 @@
 // pipeline "detect_and_correct_cloudtrail_trails_with_incorrect_tags" {
 //   title         = "Detect & correct CloudTrail trails with incorrect tags"
 //   description   = "Detects CloudTrail trails with incorrect tags and optionally attempts to correct them."
-//   tags          = merge(local.cloudtrail_common_tags, { type = "featured" })
+//   tags          = merge(local.cloudtrail_common_tags, { type = "recommended" })
 
 //   param "database" {
 //     type        = string

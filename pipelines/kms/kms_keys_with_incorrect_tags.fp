@@ -19,7 +19,7 @@ trigger "query" "detect_and_correct_kms_keys_with_incorrect_tags" {
 pipeline "detect_and_correct_kms_keys_with_incorrect_tags" {
   title         = "Detect & correct KMS keys with incorrect tags"
   description   = "Detects KMS keys with incorrect tags and optionally attempts to correct them."
-  tags          = merge(local.kms_common_tags, { type = "featured" })
+  tags          = merge(local.kms_common_tags, { type = "recommended" })
 
   param "database" {
     type        = string
@@ -78,18 +78,27 @@ variable "kms_keys_tag_rules" {
   })
   description = "KMS Key specific tag rules"
   default     = null
+  tags = {
+    folder = "Advanced/KMS"
+  }
 }
 
 variable "kms_keys_with_incorrect_tags_trigger_enabled" {
   type        = bool
   default     = false
   description = "If true, the trigger is enabled."
+  tags = {
+    folder = "Advanced/KMS"
+  }
 }
 
 variable "kms_keys_with_incorrect_tags_trigger_schedule" {
   type        = string
   default     = "15m"
   description = "The schedule on which to run the trigger if enabled."
+  tags = {
+    folder = "Advanced/KMS"
+  }
 }
 
 locals {

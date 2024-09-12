@@ -19,7 +19,7 @@ trigger "query" "detect_and_correct_elasticache_clusters_with_incorrect_tags" {
 pipeline "detect_and_correct_elasticache_clusters_with_incorrect_tags" {
   title         = "Detect & correct ElastiCache clusters with incorrect tags"
   description   = "Detects ElastiCache clusters with incorrect tags and optionally attempts to correct them."
-  tags          = merge(local.elasticache_common_tags, { type = "featured" })
+  tags          = merge(local.elasticache_common_tags, { type = "recommended" })
 
   param "database" {
     type        = string
@@ -78,18 +78,27 @@ variable "elasticache_clusters_tag_rules" {
   })
   description = "ElastiCache Cluster specific tag rules"
   default     = null
+  tags = {
+    folder = "Advanced/ElastiCache"
+  }
 }
 
 variable "elasticache_clusters_with_incorrect_tags_trigger_enabled" {
   type        = bool
   default     = false
   description = "If true, the trigger is enabled."
+  tags = {
+    folder = "Advanced/ElastiCache"
+  }
 }
 
 variable "elasticache_clusters_with_incorrect_tags_trigger_schedule" {
   type        = string
   default     = "15m"
   description = "The schedule on which to run the trigger if enabled."
+  tags = {
+    folder = "Advanced/ElastiCache"
+  }
 }
 
 locals {
