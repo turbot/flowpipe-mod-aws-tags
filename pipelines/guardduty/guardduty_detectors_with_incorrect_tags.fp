@@ -19,16 +19,16 @@ trigger "query" "detect_and_correct_guardduty_detectors_with_incorrect_tags" {
 pipeline "detect_and_correct_guardduty_detectors_with_incorrect_tags" {
   title         = "Detect & correct GuardDuty detectors with incorrect tags"
   description   = "Detects GuardDuty detectors with incorrect tags and optionally attempts to correct them."
-  tags          = merge(local.guardduty_common_tags, { type = "recommended" })
+  tags          = merge(local.guardduty_common_tags, { recommended = "true" })
 
   param "database" {
-    type        = string
+    type        = connection.steampipe
     description = local.description_database
     default     = var.database
   }
 
   param "notifier" {
-    type        = string
+    type        = notifier
     description = local.description_notifier
     default     = var.notifier
   }
@@ -40,7 +40,7 @@ pipeline "detect_and_correct_guardduty_detectors_with_incorrect_tags" {
   }
 
   param "approvers" {
-    type        = list(string)
+    type        = list(notifier)
     description = local.description_approvers
     default     = var.approvers
   }

@@ -12,9 +12,9 @@ pipeline "add_and_remove_resource_tags" {
     description = local.description_region
   }
 
-  param "cred" {
-    type        = string
-    description = local.description_credential
+  param "conn" {
+    type        = connection.aws
+    description = local.description_connection
   }
 
   param "add" {
@@ -31,7 +31,7 @@ pipeline "add_and_remove_resource_tags" {
     if       = length(param.add) > 0
     pipeline = local.aws_pipeline_tag_resources
     args     = {
-      cred          = param.cred
+      conn          = param.conn
       region        = param.region
       resource_arns = [param.arn]
       tags          = param.add
@@ -43,7 +43,7 @@ pipeline "add_and_remove_resource_tags" {
     depends_on = [step.pipeline.add_or_update]
     pipeline   = local.aws_pipeline_untag_resources
     args       = {
-      cred          = param.cred
+      conn          = param.conn
       region        = param.region
       resource_arns = [param.arn]
       tag_keys      = param.remove

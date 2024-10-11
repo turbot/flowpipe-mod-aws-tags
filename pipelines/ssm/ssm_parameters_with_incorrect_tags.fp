@@ -19,7 +19,7 @@
 // pipeline "detect_and_correct_ssm_parameters_with_incorrect_tags" {
 //   title         = "Detect & correct SSM parameters with incorrect tags"
 //   description   = "Detects SSM parameters with incorrect tags and optionally attempts to correct them."
-//   tags          = merge(local.ssm_common_tags, { type = "recommended" })
+//   tags          = merge(local.ssm_common_tags, { recommended = "true" })
 
 //   param "database" {
 //     type        = string

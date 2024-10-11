@@ -62,7 +62,7 @@ with tags as (
     arn,
     region,
     account_id,
-    sp_connection_name as cred,
+    sp_connection_name as conn,
     coalesce(tags, '{}'::jsonb) as tags,
     key,
     value
@@ -157,7 +157,7 @@ select * from (
     t.arn,
     t.region,
     t.account_id,
-    t.cred,
+    t.conn,
     coalesce((select jsonb_agg(key) from remove_tags rt where rt.arn = t.arn), '[]'::jsonb) as remove,
     coalesce((select jsonb_object_agg(at.new_key, at.value) from all_tags at where at.arn = t.arn and at.new_key != coalesce(at.old_key, '') and not exists (
       select 1 from remove_tags rt where rt.arn = at.arn and rt.key = at.new_key
@@ -166,7 +166,7 @@ select * from (
     )), '{}'::jsonb) as upsert
   from
     tags t
-  group by t.title, t.arn, t.region, t.account_id, t.cred
+  group by t.title, t.arn, t.region, t.account_id, t.conn
 ) result
 where remove != '[]'::jsonb or upsert != '{}'::jsonb;
   EOQ

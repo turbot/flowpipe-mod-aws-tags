@@ -19,16 +19,16 @@ trigger "query" "detect_and_correct_s3_buckets_with_incorrect_tags" {
 pipeline "detect_and_correct_s3_buckets_with_incorrect_tags" {
   title         = "Detect & correct S3 buckets with incorrect tags"
   description   = "Detects S3 buckets with incorrect tags and optionally attempts to correct them."
-  tags          = merge(local.s3_common_tags, { type = "recommended" })
+  tags          = merge(local.s3_common_tags, { recommended = "true" })
 
   param "database" {
-    type        = string
+    type        = connection.steampipe
     description = local.description_database
     default     = var.database
   }
 
   param "notifier" {
-    type        = string
+    type        = notifier
     description = local.description_notifier
     default     = var.notifier
   }
@@ -40,7 +40,7 @@ pipeline "detect_and_correct_s3_buckets_with_incorrect_tags" {
   }
 
   param "approvers" {
-    type        = list(string)
+    type        = list(notifier)
     description = local.description_approvers
     default     = var.approvers
   }

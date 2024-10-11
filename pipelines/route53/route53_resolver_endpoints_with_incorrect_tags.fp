@@ -19,16 +19,16 @@ trigger "query" "detect_and_correct_route53_resolver_endpoints_with_incorrect_ta
 pipeline "detect_and_correct_route53_resolver_endpoints_with_incorrect_tags" {
   title         = "Detect & correct Route53 resolver endpoints with incorrect tags"
   description   = "Detects Route53 resolver endpoints with incorrect tags and optionally attempts to correct them."
-  tags          = merge(local.route53_common_tags, { type = "recommended" })
+  tags          = merge(local.route53_common_tags, { recommended = "true" })
 
   param "database" {
-    type        = string
+    type        = connection.steampipe
     description = local.description_database
     default     = var.database
   }
 
   param "notifier" {
-    type        = string
+    type        = notifier
     description = local.description_notifier
     default     = var.notifier
   }
@@ -40,7 +40,7 @@ pipeline "detect_and_correct_route53_resolver_endpoints_with_incorrect_tags" {
   }
 
   param "approvers" {
-    type        = list(string)
+    type        = list(notifier)
     description = local.description_approvers
     default     = var.approvers
   }

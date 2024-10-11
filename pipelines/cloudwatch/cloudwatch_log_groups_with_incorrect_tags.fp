@@ -19,7 +19,7 @@
 // pipeline "detect_and_correct_cloudwatch_log_groups_with_incorrect_tags" {
 //   title         = "Detect & correct CloudWatch log groups with incorrect tags"
 //   description   = "Detects CloudWatch log groups with incorrect tags and optionally attempts to correct them."
-//   tags          = merge(local.cloudwatch_common_tags, { type = "recommended" })
+//   tags          = merge(local.cloudwatch_common_tags, { recommended = "true" })
 
 //   param "database" {
 //     type        = string

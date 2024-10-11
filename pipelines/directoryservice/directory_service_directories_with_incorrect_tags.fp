@@ -19,16 +19,16 @@ trigger "query" "detect_and_correct_directory_service_directories_with_incorrect
 pipeline "detect_and_correct_directory_service_directories_with_incorrect_tags" {
   title         = "Detect & correct Directory Service directories with incorrect tags"
   description   = "Detects Directory Service directories with incorrect tags and optionally attempts to correct them."
-  tags          = merge(local.directory_service_common_tags, { type = "recommended" })
+  tags          = merge(local.directory_service_common_tags, { recommended = "true" })
 
   param "database" {
-    type        = string
+    type        = connection.steampipe
     description = local.description_database
     default     = var.database
   }
 
   param "notifier" {
-    type        = string
+    type        = notifier
     description = local.description_notifier
     default     = var.notifier
   }
@@ -40,7 +40,7 @@ pipeline "detect_and_correct_directory_service_directories_with_incorrect_tags" 
   }
 
   param "approvers" {
-    type        = list(string)
+    type        = list(notifier)
     description = local.description_approvers
     default     = var.approvers
   }

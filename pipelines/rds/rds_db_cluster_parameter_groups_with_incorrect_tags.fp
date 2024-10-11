@@ -19,16 +19,16 @@ trigger "query" "detect_and_correct_rds_db_cluster_parameter_groups_with_incorre
 pipeline "detect_and_correct_rds_db_cluster_parameter_groups_with_incorrect_tags" {
   title       = "Detect & correct RDS DB cluster parameter groups with incorrect tags"
   description = "Detects RDS DB cluster parameter groups with incorrect tags and optionally attempts to correct them."
-  tags        = merge(local.rds_common_tags, { type = "recommended" })
+  tags        = merge(local.rds_common_tags, { recommended = "true" })
 
   param "database" {
-    type        = string
+    type        = connection.steampipe
     description = local.description_database
     default     = var.database
   }
 
   param "notifier" {
-    type        = string
+    type        = notifier
     description = local.description_notifier
     default     = var.notifier
   }
@@ -40,7 +40,7 @@ pipeline "detect_and_correct_rds_db_cluster_parameter_groups_with_incorrect_tags
   }
 
   param "approvers" {
-    type        = list(string)
+    type        = list(notifier)
     description = local.description_approvers
     default     = var.approvers
   }
