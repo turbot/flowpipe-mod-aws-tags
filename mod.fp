@@ -11,13 +11,13 @@ mod "aws_tags" {
     description = "Run pipelines to detect and correct AWS tags which are missing, prohibited or otherwise unexpected."
     image       = "/images/mods/turbot/aws-tags-social-graphic.png"
   }
-  
+
   require {
     mod "github.com/turbot/flowpipe-mod-detect-correct" {
-      version = "*"
+      version = "v1.0.0-rc.0"
     }
     mod "github.com/turbot/flowpipe-mod-aws" {
-      version = "*"
+      version = "v1.0.0-rc.2"
     }
   }
 }

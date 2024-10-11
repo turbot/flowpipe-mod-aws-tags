@@ -29,20 +29,20 @@ steampipe plugin install aws
 
 Steampipe will automatically use your default AWS credentials. Optionally, you can [setup multiple accounts](https://hub.steampipe.io/plugins/turbot/aws#multi-account-connections) or [customize AWS credentials](https://hub.steampipe.io/plugins/turbot/aws#configuring-aws-credentials).
 
-Create a [`credential_import`](https://flowpipe.io/docs/reference/config-files/credential_import) resource to import your Steampipe AWS connections:
+Create a [`connection_import`](https://flowpipe.io/docs/reference/config-files/connection_import) resource to import your Steampipe AWS connections:
 
 ```sh
 vi ~/.flowpipe/config/aws.fpc
 ```
 
 ```hcl
-credential_import "aws" {
+connection_import "aws" {
   source      = "~/.steampipe/config/aws.spc"
   connections = ["*"]
 }
 ```
 
-For more information on credentials in Flowpipe, please see [Managing Credentials](https://flowpipe.io/docs/run/credentials).
+For more information on connections in Flowpipe, please see [Managing Connections](https://flowpipe.io/docs/run/connections).
 
 Clone the mod:
 
