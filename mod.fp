@@ -4,7 +4,7 @@ mod "aws_tags" {
   color         = "#FF9900"
   documentation = file("./README.md")
   icon          = "/images/mods/turbot/aws-tags.svg"
-  categories    = ["aws", "tags", "public cloud"]
+  categories    = ["aws", "public cloud", "standard", "tags"]
 
   opengraph {
     title       = "AWS Tags Mod for Flowpipe"
