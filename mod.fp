@@ -13,6 +13,9 @@ mod "aws_tags" {
   }
 
   require {
+    flowpipe {
+      min_version = "1.0.0"
+    }
     mod "github.com/turbot/flowpipe-mod-detect-correct" {
       version = "v1.0.0-rc.0"
     }
