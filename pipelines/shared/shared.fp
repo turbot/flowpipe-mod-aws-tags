@@ -29,7 +29,7 @@ pipeline "add_and_remove_resource_tags" {
 
   step "pipeline" "add_or_update" {
     if       = length(param.add) > 0
-    pipeline = local.aws_pipeline_tag_resources
+    pipeline = aws.pipeline.tag_resources
     args     = {
       conn          = param.conn
       region        = param.region
@@ -41,7 +41,7 @@ pipeline "add_and_remove_resource_tags" {
   step "pipeline" "remove" {
     if         = length(param.remove) > 0
     depends_on = [step.pipeline.add_or_update]
-    pipeline   = local.aws_pipeline_untag_resources
+    pipeline   = aws.pipeline.untag_resources
     args       = {
       conn          = param.conn
       region        = param.region

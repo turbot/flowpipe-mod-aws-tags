@@ -35,13 +35,6 @@ locals {
   description_trigger_schedule = "The schedule on which to run the trigger if enabled."
 }
 
-// Pipeline References
-locals {
-  pipeline_optional_message    = detect_correct.pipeline.optional_message
-  aws_pipeline_tag_resources   = aws.pipeline.tag_resources
-  aws_pipeline_untag_resources = aws.pipeline.untag_resources
-}
-
 locals {
   base_tag_rules = {
     add           = try(var.base_tag_rules.add, {})
