@@ -4,7 +4,7 @@ mod "aws_tags" {
   color         = "#FF9900"
   documentation = file("./README.md")
   icon          = "/images/mods/turbot/aws-tags.svg"
-  categories    = ["aws", "tags", "public cloud"]
+  categories    = ["aws", "public cloud", "standard", "tags"]
 
   opengraph {
     title       = "AWS Tags Mod for Flowpipe"
@@ -13,6 +13,9 @@ mod "aws_tags" {
   }
 
   require {
+    flowpipe {
+      min_version = "1.0.0"
+    }
     mod "github.com/turbot/flowpipe-mod-detect-correct" {
       version = "v1.0.0-rc.0"
     }
