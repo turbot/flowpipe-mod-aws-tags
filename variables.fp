@@ -40,6 +40,7 @@ variable "incorrect_tags_default_action" {
   type        = string
   description = "The default action to take when no approvers are specified."
   default     = "notify"
+  enum        = ["notify", "apply", "skip"]
 }
 
 variable "base_tag_rules" {
@@ -51,7 +52,7 @@ variable "base_tag_rules" {
     update_values = optional(map(map(list(string))))
   })
   description = "Base rules to apply to resources unless overridden when merged with any provided resource-specific rules."
-  default     = {
+  default = {
     add           = {}
     remove        = []
     remove_except = []

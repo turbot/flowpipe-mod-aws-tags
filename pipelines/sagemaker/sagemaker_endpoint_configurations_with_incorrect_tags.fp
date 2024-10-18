@@ -1,7 +1,7 @@
 trigger "query" "detect_and_correct_sagemaker_endpoint_configurations_with_incorrect_tags" {
-  title         = "Detect & correct SageMaker endpoint configurations with incorrect tags"
-  description   = "Detects SageMaker endpoint configurations with incorrect tags and optionally attempts to correct them."
-  tags          = local.sagemaker_common_tags
+  title       = "Detect & correct SageMaker endpoint configurations with incorrect tags"
+  description = "Detects SageMaker endpoint configurations with incorrect tags and optionally attempts to correct them."
+  tags        = local.sagemaker_common_tags
 
   enabled  = var.sagemaker_endpoint_configurations_with_incorrect_tags_trigger_enabled
   schedule = var.sagemaker_endpoint_configurations_with_incorrect_tags_trigger_schedule
@@ -17,9 +17,9 @@ trigger "query" "detect_and_correct_sagemaker_endpoint_configurations_with_incor
 }
 
 pipeline "detect_and_correct_sagemaker_endpoint_configurations_with_incorrect_tags" {
-  title         = "Detect & correct SageMaker endpoint configurations with incorrect tags"
-  description   = "Detects SageMaker endpoint configurations with incorrect tags and optionally attempts to correct them."
-  tags          = merge(local.sagemaker_common_tags, { recommended = "true" })
+  title       = "Detect & correct SageMaker endpoint configurations with incorrect tags"
+  description = "Detects SageMaker endpoint configurations with incorrect tags and optionally attempts to correct them."
+  tags        = merge(local.sagemaker_common_tags, { recommended = "true" })
 
   param "database" {
     type        = connection.steampipe
@@ -49,6 +49,7 @@ pipeline "detect_and_correct_sagemaker_endpoint_configurations_with_incorrect_ta
     type        = string
     description = local.description_default_action
     default     = var.incorrect_tags_default_action
+    enum        = local.incorrect_tags_default_action_enum
   }
 
   step "query" "detect" {
@@ -103,43 +104,43 @@ variable "sagemaker_endpoint_configurations_with_incorrect_tags_trigger_schedule
 
 locals {
   sagemaker_endpoint_configurations_tag_rules = {
-    add           = merge(local.base_tag_rules.add, try(var.sagemaker_endpoint_configurations_tag_rules.add, {})) 
-    remove        = distinct(concat(local.base_tag_rules.remove , try(var.sagemaker_endpoint_configurations_tag_rules.remove, [])))
-    remove_except = distinct(concat(local.base_tag_rules.remove_except , try(var.sagemaker_endpoint_configurations_tag_rules.remove_except, [])))
+    add           = merge(local.base_tag_rules.add, try(var.sagemaker_endpoint_configurations_tag_rules.add, {}))
+    remove        = distinct(concat(local.base_tag_rules.remove, try(var.sagemaker_endpoint_configurations_tag_rules.remove, [])))
+    remove_except = distinct(concat(local.base_tag_rules.remove_except, try(var.sagemaker_endpoint_configurations_tag_rules.remove_except, [])))
     update_keys   = merge(local.base_tag_rules.update_keys, try(var.sagemaker_endpoint_configurations_tag_rules.update_keys, {}))
     update_values = merge(local.base_tag_rules.update_values, try(var.sagemaker_endpoint_configurations_tag_rules.update_values, {}))
   }
 }
 
 locals {
-  sagemaker_endpoint_configurations_update_keys_override   = join("\n", flatten([for key, patterns in local.sagemaker_endpoint_configurations_tag_rules.update_keys : [for pattern in patterns : format("      when key %s '%s' then '%s'", (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? element(split(":", pattern), 0) : "="), (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? join(":", slice(split(":", pattern), 1, length(split(":", pattern)))) : pattern), key)]]))
-  sagemaker_endpoint_configurations_remove_override        = join("\n", length(local.sagemaker_endpoint_configurations_tag_rules.remove) == 0 ? ["      when new_key like '%' then false"] : [for pattern in local.sagemaker_endpoint_configurations_tag_rules.remove : format("      when new_key %s '%s' then true", (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? element(split(":", pattern), 0) : "="), (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? join(":", slice(split(":", pattern), 1, length(split(":", pattern)))) : pattern))])
-  sagemaker_endpoint_configurations_remove_except_override = join("\n", length(local.sagemaker_endpoint_configurations_tag_rules.remove_except) == 0 ? ["      when new_key like '%' then true"] : flatten([[for key in keys(merge(local.sagemaker_endpoint_configurations_tag_rules.add, local.sagemaker_endpoint_configurations_tag_rules.update_keys)) : format("      when new_key = '%s' then true", key)], [for pattern in local.sagemaker_endpoint_configurations_tag_rules.remove_except : format("      when new_key %s '%s' then true", (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? element(split(":", pattern), 0) : "="), (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? join(":", slice(split(":", pattern), 1, length(split(":", pattern)))) : pattern))]]))
-  sagemaker_endpoint_configurations_add_override           = join(",\n", length(keys(local.sagemaker_endpoint_configurations_tag_rules.add)) == 0 ? ["      (null, null)"] : [for key, value in local.sagemaker_endpoint_configurations_tag_rules.add : format("      ('%s', '%s')", key, value)])
-  sagemaker_endpoint_configurations_update_values_override = join("\n", flatten([for key in sort(keys(local.sagemaker_endpoint_configurations_tag_rules.update_values)) : [flatten([for new_value, patterns in local.sagemaker_endpoint_configurations_tag_rules.update_values[key] : [contains(patterns, "else:") ? [] : [for pattern in patterns : format("      when new_key = '%s' and value %s '%s' then '%s'", key, (length(split(": ", pattern)) > 1 && contains(local.operators, element(split(": ", pattern), 0)) ? element(split(": ", pattern), 0) : "="), (length(split(": ", pattern)) > 1 && contains(local.operators, element(split(": ", pattern), 0)) ? join(": ", slice(split(": ", pattern), 1, length(split(": ", pattern)))) : pattern), new_value)]]]), contains(flatten([for p in values(local.sagemaker_endpoint_configurations_tag_rules.update_values[key]) : p]), "else:") ? [format("      when new_key = '%s' then '%s'", key, [for new_value, patterns in local.sagemaker_endpoint_configurations_tag_rules.update_values[key] : new_value if contains(patterns, "else:")][0])] : []]]))
-}
+  sagemaker_endpoint_configurations_update_keys_override = join("\n", flatten([for key, patterns in local.sagemaker_endpoint_configurations_tag_rules.update_keys : [for pattern in patterns : format("      when key %s '%s' then '%s'", (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? element(split(":", pattern), 0) : "="), (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? join(":", slice(split(":", pattern), 1, length(split(":", pattern)))) : pattern), key)]]))
+  sagemaker_endpoint_configurations_remove_override      = join("\n", length(local.sagemaker_endpoint_configurations_tag_rules.remove) == 0 ? ["      when new_key like '%' then false"] : [for pattern in local.sagemaker_endpoint_configurations_tag_rules.remove : format("      when new_key %s '%s' then true", (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? element(split(":", pattern), 0) : "="), (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? join(":", slice(split(":", pattern), 1, length(split(":", pattern)))) : pattern))])
+  sagemaker_endpoint_configurations_remove_except_override = join("\n", length(local.sagemaker_endpoint_configurations_tag_rules.remove_except) == 0 ? ["      when new_key like '%' then true"] : flatten( [[for key in keys(merge(local.sagemaker_endpoint_configurations_tag_rules.add, local.sagemaker_endpoint_configurations_tag_rules.update_keys)) : format("      when new_key = '%s' then true", key)], [for pattern in local.sagemaker_endpoint_configurations_tag_rules.remove_except : format("      when new_key %s '%s' then true", (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? element(split(":", pattern), 0) : "="), (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? join(":", slice(split(":", pattern), 1, length(split(":", pattern)))) : pattern))]]))
+    sagemaker_endpoint_configurations_add_override           = join(",\n", length(keys(local.sagemaker_endpoint_configurations_tag_rules.add)) == 0 ? ["      (null, null)"] : [for key, value in local.sagemaker_endpoint_configurations_tag_rules.add : format("      ('%s', '%s')", key, value)])
+    sagemaker_endpoint_configurations_update_values_override = join("\n", flatten([for key in sort(keys(local.sagemaker_endpoint_configurations_tag_rules.update_values)) : [flatten([for new_value, patterns in local.sagemaker_endpoint_configurations_tag_rules.update_values[key] : [contains(patterns, "else:") ? [] : [for pattern in patterns : format("      when new_key = '%s' and value %s '%s' then '%s'", key, (length(split(": ", pattern)) > 1 && contains(local.operators, element(split(": ", pattern), 0)) ? element(split(": ", pattern), 0) : "="), (length(split(": ", pattern)) > 1 && contains(local.operators, element(split(": ", pattern), 0)) ? join(": ", slice(split(": ", pattern), 1, length(split(": ", pattern)))) : pattern), new_value)]]]), contains(flatten([for p in values(local.sagemaker_endpoint_configurations_tag_rules.update_values[key]) : p]), "else:") ? [format("      when new_key = '%s' then '%s'", key, [for new_value, patterns in local.sagemaker_endpoint_configurations_tag_rules.update_values[key] : new_value if contains(patterns, "else:")][0])] : []]]))
+    }
 
-locals {
-  sagemaker_endpoint_configurations_with_incorrect_tags_query = replace(
-    replace(
-      replace(
+    locals {
+      sagemaker_endpoint_configurations_with_incorrect_tags_query = replace(
         replace(
           replace(
             replace(
               replace(
-                local.tags_query_template,
-                "__TITLE__", "title"
+                replace(
+                  replace(
+                    local.tags_query_template,
+                    "__TITLE__", "title"
+                  ),
+                  "__TABLE_NAME__", "aws_sagemaker_endpoint_configuration"
+                ),
+                "__UPDATE_KEYS_OVERRIDE__", local.sagemaker_endpoint_configurations_update_keys_override
               ),
-              "__TABLE_NAME__", "aws_sagemaker_endpoint_configuration"
+              "__REMOVE_OVERRIDE__", local.sagemaker_endpoint_configurations_remove_override
             ),
-            "__UPDATE_KEYS_OVERRIDE__", local.sagemaker_endpoint_configurations_update_keys_override
+            "__REMOVE_EXCEPT_OVERRIDE__", local.sagemaker_endpoint_configurations_remove_except_override
           ),
-          "__REMOVE_OVERRIDE__", local.sagemaker_endpoint_configurations_remove_override
+          "__ADD_OVERRIDE__", local.sagemaker_endpoint_configurations_add_override
         ),
-        "__REMOVE_EXCEPT_OVERRIDE__", local.sagemaker_endpoint_configurations_remove_except_override
-      ),
-      "__ADD_OVERRIDE__", local.sagemaker_endpoint_configurations_add_override
-    ),
-    "__UPDATE_VALUES_OVERRIDE__", local.sagemaker_endpoint_configurations_update_values_override
-  )
-}
+        "__UPDATE_VALUES_OVERRIDE__", local.sagemaker_endpoint_configurations_update_values_override
+      )
+    }

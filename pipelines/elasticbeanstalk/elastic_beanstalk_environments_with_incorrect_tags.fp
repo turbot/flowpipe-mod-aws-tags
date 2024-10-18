@@ -1,7 +1,7 @@
 trigger "query" "detect_and_correct_elastic_beanstalk_environments_with_incorrect_tags" {
-  title         = "Detect & correct Elastic Beanstalk environments with incorrect tags"
-  description   = "Detects Elastic Beanstalk environments with incorrect tags and optionally attempts to correct them."
-  tags          = local.elastic_beanstalk_common_tags
+  title       = "Detect & correct Elastic Beanstalk environments with incorrect tags"
+  description = "Detects Elastic Beanstalk environments with incorrect tags and optionally attempts to correct them."
+  tags        = local.elastic_beanstalk_common_tags
 
   enabled  = var.elastic_beanstalk_environments_with_incorrect_tags_trigger_enabled
   schedule = var.elastic_beanstalk_environments_with_incorrect_tags_trigger_schedule
@@ -17,9 +17,9 @@ trigger "query" "detect_and_correct_elastic_beanstalk_environments_with_incorrec
 }
 
 pipeline "detect_and_correct_elastic_beanstalk_environments_with_incorrect_tags" {
-  title         = "Detect & correct Elastic Beanstalk environments with incorrect tags"
-  description   = "Detects Elastic Beanstalk environments with incorrect tags and optionally attempts to correct them."
-  tags          = merge(local.elastic_beanstalk_common_tags, { recommended = "true" })
+  title       = "Detect & correct Elastic Beanstalk environments with incorrect tags"
+  description = "Detects Elastic Beanstalk environments with incorrect tags and optionally attempts to correct them."
+  tags        = merge(local.elastic_beanstalk_common_tags, { recommended = "true" })
 
   param "database" {
     type        = connection.steampipe
@@ -49,6 +49,7 @@ pipeline "detect_and_correct_elastic_beanstalk_environments_with_incorrect_tags"
     type        = string
     description = local.description_default_action
     default     = var.incorrect_tags_default_action
+    enum        = local.incorrect_tags_default_action_enum
   }
 
   step "query" "detect" {
@@ -104,42 +105,42 @@ variable "elastic_beanstalk_environments_with_incorrect_tags_trigger_schedule" {
 locals {
   elastic_beanstalk_environments_tag_rules = {
     add           = merge(local.base_tag_rules.add, try(var.elastic_beanstalk_environments_tag_rules.add, {}))
-    remove        = distinct(concat(local.base_tag_rules.remove , try(var.elastic_beanstalk_environments_tag_rules.remove, [])))
-    remove_except = distinct(concat(local.base_tag_rules.remove_except , try(var.elastic_beanstalk_environments_tag_rules.remove_except, [])))
+    remove        = distinct(concat(local.base_tag_rules.remove, try(var.elastic_beanstalk_environments_tag_rules.remove, [])))
+    remove_except = distinct(concat(local.base_tag_rules.remove_except, try(var.elastic_beanstalk_environments_tag_rules.remove_except, [])))
     update_keys   = merge(local.base_tag_rules.update_keys, try(var.elastic_beanstalk_environments_tag_rules.update_keys, {}))
     update_values = merge(local.base_tag_rules.update_values, try(var.elastic_beanstalk_environments_tag_rules.update_values, {}))
   }
 }
 
 locals {
-  elastic_beanstalk_environments_update_keys_override   = join("\n", flatten([for key, patterns in local.elastic_beanstalk_environments_tag_rules.update_keys : [for pattern in patterns : format("      when key %s '%s' then '%s'", (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? element(split(":", pattern), 0) : "="), (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? join(":", slice(split(":", pattern), 1, length(split(":", pattern)))) : pattern), key)]]))
-  elastic_beanstalk_environments_remove_override        = join("\n", length(local.elastic_beanstalk_environments_tag_rules.remove) == 0 ? ["      when new_key like '%' then false"] : [for pattern in local.elastic_beanstalk_environments_tag_rules.remove : format("      when new_key %s '%s' then true", (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? element(split(":", pattern), 0) : "="), (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? join(":", slice(split(":", pattern), 1, length(split(":", pattern)))) : pattern))])
-  elastic_beanstalk_environments_remove_except_override = join("\n", length(local.elastic_beanstalk_environments_tag_rules.remove_except) == 0 ? ["      when new_key like '%' then true"] : flatten([[for key in keys(merge(local.elastic_beanstalk_environments_tag_rules.add, local.elastic_beanstalk_environments_tag_rules.update_keys)) : format("      when new_key = '%s' then true", key)], [for pattern in local.elastic_beanstalk_environments_tag_rules.remove_except : format("      when new_key %s '%s' then true", (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? element(split(":", pattern), 0) : "="), (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? join(":", slice(split(":", pattern), 1, length(split(":", pattern)))) : pattern))]]))
-  elastic_beanstalk_environments_add_override           = join(",\n", length(keys(local.elastic_beanstalk_environments_tag_rules.add)) == 0 ? ["      (null, null)"] : [for key, value in local.elastic_beanstalk_environments_tag_rules.add : format("      ('%s', '%s')", key, value)])
-  elastic_beanstalk_environments_update_values_override = join("\n", flatten([for key in sort(keys(local.elastic_beanstalk_environments_tag_rules.update_values)) : [flatten([for new_value, patterns in local.elastic_beanstalk_environments_tag_rules.update_values[key] : [contains(patterns, "else:") ? [] : [for pattern in patterns : format("      when new_key = '%s' and value %s '%s' then '%s'", key, (length(split(": ", pattern)) > 1 && contains(local.operators, element(split(": ", pattern), 0)) ? element(split(": ", pattern), 0) : "="), (length(split(": ", pattern)) > 1 && contains(local.operators, element(split(": ", pattern), 0)) ? join(": ", slice(split(": ", pattern), 1, length(split(": ", pattern)))) : pattern), new_value)]]]), contains(flatten([for p in values(local.elastic_beanstalk_environments_tag_rules.update_values[key]) : p]), "else:") ? [format("      when new_key = '%s' then '%s'", key, [for new_value, patterns in local.elastic_beanstalk_environments_tag_rules.update_values[key] : new_value if contains(patterns, "else:")][0])] : []]]))
-}
+  elastic_beanstalk_environments_update_keys_override = join("\n", flatten([for key, patterns in local.elastic_beanstalk_environments_tag_rules.update_keys : [for pattern in patterns : format("      when key %s '%s' then '%s'", (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? element(split(":", pattern), 0) : "="), (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? join(":", slice(split(":", pattern), 1, length(split(":", pattern)))) : pattern), key)]]))
+  elastic_beanstalk_environments_remove_override      = join("\n", length(local.elastic_beanstalk_environments_tag_rules.remove) == 0 ? ["      when new_key like '%' then false"] : [for pattern in local.elastic_beanstalk_environments_tag_rules.remove : format("      when new_key %s '%s' then true", (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? element(split(":", pattern), 0) : "="), (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? join(":", slice(split(":", pattern), 1, length(split(":", pattern)))) : pattern))])
+  elastic_beanstalk_environments_remove_except_override = join("\n", length(local.elastic_beanstalk_environments_tag_rules.remove_except) == 0 ? ["      when new_key like '%' then true"] : flatten( [[for key in keys(merge(local.elastic_beanstalk_environments_tag_rules.add, local.elastic_beanstalk_environments_tag_rules.update_keys)) : format("      when new_key = '%s' then true", key)], [for pattern in local.elastic_beanstalk_environments_tag_rules.remove_except : format("      when new_key %s '%s' then true", (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? element(split(":", pattern), 0) : "="), (length(split(":", pattern)) > 1 && contains(local.operators, element(split(":", pattern), 0)) ? join(":", slice(split(":", pattern), 1, length(split(":", pattern)))) : pattern))]]))
+    elastic_beanstalk_environments_add_override           = join(",\n", length(keys(local.elastic_beanstalk_environments_tag_rules.add)) == 0 ? ["      (null, null)"] : [for key, value in local.elastic_beanstalk_environments_tag_rules.add : format("      ('%s', '%s')", key, value)])
+    elastic_beanstalk_environments_update_values_override = join("\n", flatten([for key in sort(keys(local.elastic_beanstalk_environments_tag_rules.update_values)) : [flatten([for new_value, patterns in local.elastic_beanstalk_environments_tag_rules.update_values[key] : [contains(patterns, "else:") ? [] : [for pattern in patterns : format("      when new_key = '%s' and value %s '%s' then '%s'", key, (length(split(": ", pattern)) > 1 && contains(local.operators, element(split(": ", pattern), 0)) ? element(split(": ", pattern), 0) : "="), (length(split(": ", pattern)) > 1 && contains(local.operators, element(split(": ", pattern), 0)) ? join(": ", slice(split(": ", pattern), 1, length(split(": ", pattern)))) : pattern), new_value)]]]), contains(flatten([for p in values(local.elastic_beanstalk_environments_tag_rules.update_values[key]) : p]), "else:") ? [format("      when new_key = '%s' then '%s'", key, [for new_value, patterns in local.elastic_beanstalk_environments_tag_rules.update_values[key] : new_value if contains(patterns, "else:")][0])] : []]]))
+    }
 
-locals {
-  elastic_beanstalk_environments_with_incorrect_tags_query = replace(
-    replace(
-      replace(
+    locals {
+      elastic_beanstalk_environments_with_incorrect_tags_query = replace(
         replace(
           replace(
             replace(
               replace(
-                local.tags_query_template,
-                "__TITLE__", "title"
+                replace(
+                  replace(
+                    local.tags_query_template,
+                    "__TITLE__", "title"
+                  ),
+                  "__TABLE_NAME__", "aws_elastic_beanstalk_environment"
+                ),
+                "__UPDATE_KEYS_OVERRIDE__", local.elastic_beanstalk_environments_update_keys_override
               ),
-              "__TABLE_NAME__", "aws_elastic_beanstalk_environment"
+              "__REMOVE_OVERRIDE__", local.elastic_beanstalk_environments_remove_override
             ),
-            "__UPDATE_KEYS_OVERRIDE__", local.elastic_beanstalk_environments_update_keys_override
+            "__REMOVE_EXCEPT_OVERRIDE__", local.elastic_beanstalk_environments_remove_except_override
           ),
-          "__REMOVE_OVERRIDE__", local.elastic_beanstalk_environments_remove_override
+          "__ADD_OVERRIDE__", local.elastic_beanstalk_environments_add_override
         ),
-        "__REMOVE_EXCEPT_OVERRIDE__", local.elastic_beanstalk_environments_remove_except_override
-      ),
-      "__ADD_OVERRIDE__", local.elastic_beanstalk_environments_add_override
-    ),
-    "__UPDATE_VALUES_OVERRIDE__", local.elastic_beanstalk_environments_update_values_override
-  )
-}
+        "__UPDATE_VALUES_OVERRIDE__", local.elastic_beanstalk_environments_update_values_override
+      )
+    }

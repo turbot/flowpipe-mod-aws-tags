@@ -1,6 +1,6 @@
 pipeline "correct_resources_with_incorrect_tags" {
-  title         = "Correct resources with incorrect tags"
-  description   = "Corrects resources with incorrect tags"
+  title       = "Correct resources with incorrect tags"
+  description = "Corrects resources with incorrect tags"
 
   param "items" {
     type = list(object({
@@ -37,6 +37,7 @@ pipeline "correct_resources_with_incorrect_tags" {
     type        = string
     description = local.description_default_action
     default     = var.incorrect_tags_default_action
+    enum        = local.incorrect_tags_default_action_enum
   }
 
   step "pipeline" "correct_one" {
@@ -60,8 +61,8 @@ pipeline "correct_resources_with_incorrect_tags" {
 }
 
 pipeline "correct_one_resource_with_incorrect_tags" {
-  title         = "Correct one resource with incorrect tags"
-  description   = "Corrects one resource with incorrect tags"
+  title       = "Correct one resource with incorrect tags"
+  description = "Corrects one resource with incorrect tags"
 
   param "title" {
     type        = string
@@ -120,6 +121,7 @@ pipeline "correct_one_resource_with_incorrect_tags" {
     type        = string
     description = local.description_default_action
     default     = var.incorrect_tags_default_action
+    enum        = local.incorrect_tags_default_action_enum
   }
 
   step "transform" "remove_keys_display" {
@@ -163,7 +165,7 @@ pipeline "correct_one_resource_with_incorrect_tags" {
           style        = local.style_ok
           pipeline_ref = pipeline.add_and_remove_resource_tags
           pipeline_args = {
-            conn   = param.conn 
+            conn   = param.conn
             region = param.region
             arn    = param.arn
             add    = param.upsert
