@@ -16,6 +16,12 @@ locals {
   style_alert   = "alert"
 }
 
+// Notification level
+
+locals {
+  notification_level_enum = ["info", "verbose", "error"]
+}
+
 // Common Texts
 locals {
   description_account_id       = "The account ID of the resource."

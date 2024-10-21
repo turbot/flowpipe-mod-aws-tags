@@ -37,6 +37,7 @@ pipeline "detect_and_correct_kinesis_firehose_delivery_streams_with_incorrect_ta
     type        = string
     description = local.description_notifier_level
     default     = var.notification_level
+    enum        = local.notification_level_enum
   }
 
   param "approvers" {

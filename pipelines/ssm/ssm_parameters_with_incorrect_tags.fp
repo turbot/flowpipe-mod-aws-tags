@@ -37,6 +37,7 @@
 //     type        = string
 //     description = local.description_notifier_level
 //     default     = var.notification_level
+//     enum = local.notification_level_enum
 //   }
 
 //   param "approvers" {

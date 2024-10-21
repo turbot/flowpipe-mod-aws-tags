@@ -27,7 +27,7 @@ Install the AWS plugin with [Steampipe](https://steampipe.io):
 steampipe plugin install aws
 ```
 
-Steampipe will automatically use your default AWS credentials. Optionally, you can [setup multiple accounts](https://hub.steampipe.io/plugins/turbot/aws#multi-account-connections) or [customize AWS credentials](https://hub.steampipe.io/plugins/turbot/aws#configuring-aws-credentials).
+Steampipe will automatically use your default AWS connections. Optionally, you can [setup multiple accounts](https://hub.steampipe.io/plugins/turbot/aws#multi-account-connections) or [customize AWS connections](https://hub.steampipe.io/plugins/turbot/aws#configuring-aws-connections).
 
 Create a [`connection_import`](https://flowpipe.io/docs/reference/config-files/connection_import) resource to import your Steampipe AWS connections:
 
