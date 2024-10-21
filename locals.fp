@@ -36,7 +36,7 @@ locals {
 }
 
 locals {
-  incorrect_labels_default_action_enum = ["notify", "apply", "skip"]
+  incorrect_tags_default_action_enum = ["notify", "apply", "skip"]
 }
 
 locals {

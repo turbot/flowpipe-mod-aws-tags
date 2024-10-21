@@ -51,7 +51,7 @@
 //     type        = string
 //     description = local.description_default_action
 //     default     = var.incorrect_tags_default_action
-enum = local.incorrect_tags_default_action_enum
+//     enum        = local.incorrect_tags_default_action_enum
 //   }
 
 //   step "query" "detect" {
