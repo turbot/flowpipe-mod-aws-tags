@@ -1,9 +1,11 @@
-## Core options
-database                      = "postgres:#steampipe@localhost:9193/steampipe"
-notifier                      = "default"
-notification_level            = "info"
-approvers                     = ["default"]
-max_concurrency               = 1
+# Core options
+approvers          = [notifier.default]
+notifier           = notifier.default
+notification_level = "info"
+
+# Advanced options
+database        = connection.steampipe.default
+max_concurrency = 1
 
 incorrect_tags_default_action = "notify"
 

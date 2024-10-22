@@ -19,16 +19,16 @@ trigger "query" "detect_and_correct_dms_replication_instances_with_incorrect_tag
 pipeline "detect_and_correct_dms_replication_instances_with_incorrect_tags" {
   title       = "Detect & correct DMS replication instances with incorrect tags"
   description = "Detects DMS replication instances with incorrect tags and optionally attempts to correct them."
-  tags        = merge(local.dms_common_tags, { type = "featured" })
+  tags        = merge(local.dms_common_tags, { recommended = "true" })
 
   param "database" {
-    type        = string
+    type        = connection.steampipe
     description = local.description_database
     default     = var.database
   }
 
   param "notifier" {
-    type        = string
+    type        = notifier
     description = local.description_notifier
     default     = var.notifier
   }
@@ -37,10 +37,11 @@ pipeline "detect_and_correct_dms_replication_instances_with_incorrect_tags" {
     type        = string
     description = local.description_notifier_level
     default     = var.notification_level
+    enum        = local.notification_level_enum
   }
 
   param "approvers" {
-    type        = list(string)
+    type        = list(notifier)
     description = local.description_approvers
     default     = var.approvers
   }
@@ -49,6 +50,7 @@ pipeline "detect_and_correct_dms_replication_instances_with_incorrect_tags" {
     type        = string
     description = local.description_default_action
     default     = var.incorrect_tags_default_action
+    enum        = local.incorrect_tags_default_action_enum
   }
 
   step "query" "detect" {
@@ -78,18 +80,27 @@ variable "dms_replication_instances_tag_rules" {
   })
   description = "DMS Replication Instance specific tag rules"
   default     = null
+  tags = {
+    folder = "Advanced/DMS"
+  }
 }
 
 variable "dms_replication_instances_with_incorrect_tags_trigger_enabled" {
   type        = bool
   default     = false
   description = "If true, the trigger is enabled."
+  tags = {
+    folder = "Advanced/DMS"
+  }
 }
 
 variable "dms_replication_instances_with_incorrect_tags_trigger_schedule" {
   type        = string
   default     = "15m"
   description = "The schedule on which to run the trigger if enabled."
+  tags = {
+    folder = "Advanced/DMS"
+  }
 }
 
 locals {

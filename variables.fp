@@ -1,37 +1,47 @@
-variable "database" {
-  type        = string
-  description = "Steampipe database connection string."
-  default     = "postgres://steampipe@localhost:9193/steampipe"
+variable "approvers" {
+  type        = list(notifier)
+  description = "List of notifiers to be used for obtaining action/approval decisions, when empty list will perform the default response associated with the detection."
+  default     = [notifier.default]
 }
 
 variable "notifier" {
-  type        = string
-  description = "The name of the notifier to use for sending notification messages."
-  default     = "default"
+  type        = notifier
+  description = "The notifier to use for sending notification messages."
+  default     = notifier.default
 }
 
 variable "notification_level" {
   type        = string
-  description = "The verbosity level of notification messages to send. Valid options are 'verbose', 'info', 'error'."
+  description = "The verbosity level of notification messages to send."
   default     = "info"
+  enum        = ["info", "verbose", "error"]
 }
 
-variable "approvers" {
-  type        = list(string)
-  description = "List of notifiers to be used for obtaining action/approval decisions, when empty list will perform the default response associated with the detection."
-  default     = ["default"]
+variable "database" {
+  type        = connection.steampipe
+  description = "Steampipe database connection string."
+  default     = connection.steampipe.default
+
+  tags = {
+    folder = "Advanced"
+  }
 }
 
 variable "max_concurrency" {
   type        = number
   description = "The maximum concurrency to use for responding to detection items."
   default     = 1
+
+  tags = {
+    folder = "Advanced"
+  }
 }
 
 variable "incorrect_tags_default_action" {
   type        = string
   description = "The default action to take when no approvers are specified."
   default     = "notify"
+  enum        = ["notify", "apply", "skip"]
 }
 
 variable "base_tag_rules" {
@@ -43,7 +53,7 @@ variable "base_tag_rules" {
     update_values = optional(map(map(list(string))))
   })
   description = "Base rules to apply to resources unless overridden when merged with any provided resource-specific rules."
-  default     = {
+  default = {
     add           = {}
     remove        = []
     remove_except = []

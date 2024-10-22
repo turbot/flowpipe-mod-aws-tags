@@ -21,7 +21,7 @@
 // pipeline "detect_and_correct_cloudtrail_trails_with_incorrect_tags" {
 //   title         = "Detect & correct CloudTrail trails with incorrect tags"
 //   description   = "Detects CloudTrail trails with incorrect tags and optionally attempts to correct them."
-//   tags          = merge(local.cloudtrail_common_tags, { type = "featured" })
+//   tags          = merge(local.cloudtrail_common_tags, { recommended = "true" })
 
 //   param "database" {
 //     type        = string
@@ -39,6 +39,7 @@
 //     type        = string
 //     description = local.description_notifier_level
 //     default     = var.notification_level
+//     enum = local.notification_level_enum
 //   }
 
 //   param "approvers" {
@@ -51,6 +52,7 @@
 //     type        = string
 //     description = local.description_default_action
 //     default     = var.incorrect_tags_default_action
+//     enum        = local.incorrect_tags_default_action_enum
 //   }
 
 //   step "query" "detect" {
