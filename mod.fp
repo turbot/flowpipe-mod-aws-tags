@@ -18,10 +18,10 @@ mod "aws_tags" {
       min_version = "1.0.0"
     }
     mod "github.com/turbot/flowpipe-mod-detect-correct" {
-      version = "v1.0.0-rc.0"
+      version = "^1"
     }
     mod "github.com/turbot/flowpipe-mod-aws" {
-      version = "v1.0.0-rc.2"
+      version = "^1"
     }
   }
 }
