@@ -16,30 +16,33 @@ locals {
   style_alert   = "alert"
 }
 
-// Common Texts
+// Notification level
+
 locals {
-  description_database         = "Database connection string."
-  description_approvers        = "List of notifiers to be used for obtaining action/approval decisions."
-  description_max_concurrency  = "The maximum concurrency to use for responding to detection items."
-  description_notifier         = "The name of the notifier to use for sending notification messages."
-  description_notifier_level   = "The verbosity level of notification messages to send. Valid options are 'verbose', 'info', 'error'."
-  description_default_action   = "The default action to use for the detected item, used if no input is provided."
-  description_enabled_actions  = "The list of enabled actions to provide to approvers for selection."
-  description_trigger_enabled  = "If true, the trigger is enabled."
-  description_trigger_schedule = "The schedule on which to run the trigger if enabled."
-  description_credential       = "Name of the credential to be used for any authenticated actions."
-  description_region           = "AWS Region of the resource(s)."
-  description_title            = "Title of the resource, to be used as a display name."
-  description_arn              = "The ARN of the resource."
-  description_account_id       = "The account ID of the resource."
-  description_items            = "A collection of detected resources to run corrective actions against."
+  notification_level_enum = ["info", "verbose", "error"]
 }
 
-// Pipeline References
+// Common Texts
 locals {
-  pipeline_optional_message    = detect_correct.pipeline.optional_message
-  aws_pipeline_tag_resources   = aws.pipeline.tag_resources
-  aws_pipeline_untag_resources = aws.pipeline.untag_resources
+  description_account_id       = "The account ID of the resource."
+  description_approvers        = "List of notifiers to be used for obtaining action/approval decisions."
+  description_arn              = "The ARN of the resource."
+  description_connection       = "Name of the AWS connection to be used for any authenticated actions."
+  description_database         = "Database connection string."
+  description_default_action   = "The default action to use for the detected item, used if no input is provided."
+  description_enabled_actions  = "The list of enabled actions to provide to approvers for selection."
+  description_items            = "A collection of detected resources to run corrective actions against."
+  description_max_concurrency  = "The maximum concurrency to use for responding to detection items."
+  description_notifier         = "The name of the notifier to use for sending notification messages."
+  description_notifier_level   = "The verbosity level of notification messages to send."
+  description_region           = "AWS Region of the resource(s)."
+  description_title            = "Title of the resource, to be used as a display name."
+  description_trigger_enabled  = "If true, the trigger is enabled."
+  description_trigger_schedule = "The schedule on which to run the trigger if enabled."
+}
+
+locals {
+  incorrect_tags_default_action_enum = ["notify", "apply", "skip"]
 }
 
 locals {
@@ -62,7 +65,7 @@ with tags as (
     arn,
     region,
     account_id,
-    sp_connection_name as cred,
+    sp_connection_name as conn,
     coalesce(tags, '{}'::jsonb) as tags,
     key,
     value
@@ -157,7 +160,7 @@ select * from (
     t.arn,
     t.region,
     t.account_id,
-    t.cred,
+    t.conn,
     coalesce((select jsonb_agg(key) from remove_tags rt where rt.arn = t.arn), '[]'::jsonb) as remove,
     coalesce((select jsonb_object_agg(at.new_key, at.value) from all_tags at where at.arn = t.arn and at.new_key != coalesce(at.old_key, '') and not exists (
       select 1 from remove_tags rt where rt.arn = at.arn and rt.key = at.new_key
@@ -166,7 +169,7 @@ select * from (
     )), '{}'::jsonb) as upsert
   from
     tags t
-  group by t.title, t.arn, t.region, t.account_id, t.cred
+  group by t.title, t.arn, t.region, t.account_id, t.conn
 ) result
 where remove != '[]'::jsonb or upsert != '{}'::jsonb;
   EOQ

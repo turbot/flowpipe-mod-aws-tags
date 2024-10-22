@@ -1,6 +1,6 @@
 pipeline "correct_resources_with_incorrect_tags" {
-  title         = "Correct resources with incorrect tags"
-  description   = "Corrects resources with incorrect tags"
+  title       = "Correct resources with incorrect tags"
+  description = "Corrects resources with incorrect tags"
 
   param "items" {
     type = list(object({
@@ -8,7 +8,7 @@ pipeline "correct_resources_with_incorrect_tags" {
       arn        = string
       region     = string
       account_id = string
-      cred       = string
+      conn       = string
       remove     = list(string)
       upsert     = map(string)
     }))
@@ -16,7 +16,7 @@ pipeline "correct_resources_with_incorrect_tags" {
   }
 
   param "notifier" {
-    type        = string
+    type        = notifier
     description = local.description_notifier
     default     = var.notifier
   }
@@ -25,10 +25,11 @@ pipeline "correct_resources_with_incorrect_tags" {
     type        = string
     description = local.description_notifier_level
     default     = var.notification_level
+    enum        = local.notification_level_enum
   }
 
   param "approvers" {
-    type        = list(string)
+    type        = list(notifier)
     description = local.description_approvers
     default     = var.approvers
   }
@@ -37,6 +38,7 @@ pipeline "correct_resources_with_incorrect_tags" {
     type        = string
     description = local.description_default_action
     default     = var.incorrect_tags_default_action
+    enum        = local.incorrect_tags_default_action_enum
   }
 
   step "pipeline" "correct_one" {
@@ -47,7 +49,7 @@ pipeline "correct_resources_with_incorrect_tags" {
       title              = each.value.title
       arn                = each.value.arn
       region             = each.value.region
-      cred               = each.value.cred
+      conn               = connection.aws[each.value.conn]
       account_id         = each.value.account_id
       remove             = each.value.remove
       upsert             = each.value.upsert
@@ -60,8 +62,8 @@ pipeline "correct_resources_with_incorrect_tags" {
 }
 
 pipeline "correct_one_resource_with_incorrect_tags" {
-  title         = "Correct one resource with incorrect tags"
-  description   = "Corrects one resource with incorrect tags"
+  title       = "Correct one resource with incorrect tags"
+  description = "Corrects one resource with incorrect tags"
 
   param "title" {
     type        = string
@@ -78,9 +80,9 @@ pipeline "correct_one_resource_with_incorrect_tags" {
     description = local.description_region
   }
 
-  param "cred" {
-    type        = string
-    description = local.description_credential
+  param "conn" {
+    type        = connection.aws
+    description = local.description_connection
   }
 
   param "account_id" {
@@ -99,7 +101,7 @@ pipeline "correct_one_resource_with_incorrect_tags" {
   }
 
   param "notifier" {
-    type        = string
+    type        = notifier
     description = local.description_notifier
     default     = var.notifier
   }
@@ -108,10 +110,11 @@ pipeline "correct_one_resource_with_incorrect_tags" {
     type        = string
     description = local.description_notifier_level
     default     = var.notification_level
+    enum        = local.notification_level_enum
   }
 
   param "approvers" {
-    type        = list(string)
+    type        = list(notifier)
     description = local.description_approvers
     default     = var.approvers
   }
@@ -120,6 +123,7 @@ pipeline "correct_one_resource_with_incorrect_tags" {
     type        = string
     description = local.description_default_action
     default     = var.incorrect_tags_default_action
+    enum        = local.incorrect_tags_default_action_enum
   }
 
   step "transform" "remove_keys_display" {
@@ -148,7 +152,7 @@ pipeline "correct_one_resource_with_incorrect_tags" {
           label        = "Skip"
           value        = "skip"
           style        = local.style_info
-          pipeline_ref = local.pipeline_optional_message
+          pipeline_ref = detect_correct.pipeline.optional_message
           pipeline_args = {
             notifier = param.notifier
             send     = param.notification_level == local.level_verbose
@@ -157,13 +161,13 @@ pipeline "correct_one_resource_with_incorrect_tags" {
           success_msg = ""
           error_msg   = ""
         }
-       "apply" = {
+        "apply" = {
           label        = "Apply"
           value        = "apply"
           style        = local.style_ok
           pipeline_ref = pipeline.add_and_remove_resource_tags
           pipeline_args = {
-            cred   = param.cred 
+            conn   = param.conn
             region = param.region
             arn    = param.arn
             add    = param.upsert

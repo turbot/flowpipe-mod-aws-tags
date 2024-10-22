@@ -19,16 +19,16 @@ trigger "query" "detect_and_correct_rds_db_option_groups_with_incorrect_tags" {
 pipeline "detect_and_correct_rds_db_option_groups_with_incorrect_tags" {
   title       = "Detect & correct RDS DB option groups with incorrect tags"
   description = "Detects RDS DB option groups with incorrect tags and optionally attempts to correct them."
-  tags        = merge(local.rds_common_tags, { type = "featured" })
+  tags        = merge(local.rds_common_tags, { recommended = "true" })
 
   param "database" {
-    type        = string
+    type        = connection.steampipe
     description = local.description_database
     default     = var.database
   }
 
   param "notifier" {
-    type        = string
+    type        = notifier
     description = local.description_notifier
     default     = var.notifier
   }
@@ -37,10 +37,11 @@ pipeline "detect_and_correct_rds_db_option_groups_with_incorrect_tags" {
     type        = string
     description = local.description_notifier_level
     default     = var.notification_level
+    enum        = local.notification_level_enum
   }
 
   param "approvers" {
-    type        = list(string)
+    type        = list(notifier)
     description = local.description_approvers
     default     = var.approvers
   }
@@ -49,6 +50,7 @@ pipeline "detect_and_correct_rds_db_option_groups_with_incorrect_tags" {
     type        = string
     description = local.description_default_action
     default     = var.incorrect_tags_default_action
+    enum        = local.incorrect_tags_default_action_enum
   }
 
   step "query" "detect" {
@@ -78,18 +80,27 @@ variable "rds_db_option_groups_tag_rules" {
   })
   description = "RDS DB Option Group specific tag rules"
   default     = null
+  tags = {
+    folder = "Advanced/RDS"
+  }
 }
 
 variable "rds_db_option_groups_with_incorrect_tags_trigger_enabled" {
   type        = bool
   default     = false
   description = "If true, the trigger is enabled."
+  tags = {
+    folder = "Advanced/RDS"
+  }
 }
 
 variable "rds_db_option_groups_with_incorrect_tags_trigger_schedule" {
   type        = string
   default     = "15m"
   description = "The schedule on which to run the trigger if enabled."
+  tags = {
+    folder = "Advanced/RDS"
+  }
 }
 
 locals {
