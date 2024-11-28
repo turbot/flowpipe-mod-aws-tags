@@ -44,18 +44,12 @@ connection_import "aws" {
 
 For more information on connections in Flowpipe, please see [Managing Connections](https://flowpipe.io/docs/run/connections).
 
-Clone the mod:
+Install the mod:
 
 ```sh
 mkdir aws-tags
 cd aws-tags
-git clone git@github.com:turbot/flowpipe-mod-aws-tags.git
-```
-
-Install the dependencies:
-
-```sh
-flowpipe mod install
+flowpipe mod install github.com/turbot/flowpipe-mod-aws-tags
 ```
 
 ### Configuration
@@ -442,7 +436,7 @@ flowpipe pipeline list | grep "detect_and_correct"
 
 Then run your chosen pipeline, for example if we wish to remediate tags on our `S3 buckets`:
 ```sh
-flowpipe pipeline run detect_and_correct_s3_buckets_with_incorrect_tags --var-file flowpipe.fpvars
+flowpipe pipeline run aws_tags.pipeline.detect_and_correct_s3_buckets_with_incorrect_tags --var-file flowpipe.fpvars
 ```
 
 This will then run the pipeline and depending on your configured running mode; perform the relevant action(s), there are 3 running modes:
@@ -470,7 +464,7 @@ base_tag_rules = ... # omitted for brevity
 or pass the `approvers` and `default_action` arguments on the command-line.
 
 ```sh
-flowpipe pipeline run detect_and_correct_s3_buckets_with_incorrect_tags --var-file flowpipe.fpvars --arg='default_action=notify' --arg='approvers=[]'
+flowpipe pipeline run aws_tags.pipeline.detect_and_correct_s3_buckets_with_incorrect_tags --var-file flowpipe.fpvars --arg='default_action=notify' --arg='approvers=[]'
 ```
 
 #### Automatic
@@ -488,7 +482,7 @@ base_tag_rules = ... # omitted for brevity
 or pass the `default_action` argument on the command-line.
 
 ```sh
-flowpipe pipeline run detect_and_correct_s3_buckets_with_incorrect_tags --var-file flowpipe.fpvars --arg='default_action=apply'
+flowpipe pipeline run aws_tags.pipeline.detect_and_correct_s3_buckets_with_incorrect_tags --var-file flowpipe.fpvars --arg='default_action=apply'
 ```
 
 To further enhance this approach, you can enable the pipelines corresponding [query trigger](#running-query-triggers) to run completely hands-off.
