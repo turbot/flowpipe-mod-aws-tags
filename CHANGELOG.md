@@ -1,3 +1,9 @@
+## v1.0.1 (2024-11-28)
+
+_Enhancements_
+
+- Updated the README to include the latest mod installation instructions. ([#34](https://github.com/turbot/flowpipe-mod-aws-tags/pull/34))
+
 ## v1.0.0 (2024-10-22)
 
 _Breaking changes_
