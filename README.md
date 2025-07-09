@@ -334,7 +334,7 @@ base_tag_rules = {
 And you want to apply additional rules to S3 buckets:
 
 ```hcl
-s3_bucket_tag_rules = {
+s3_buckets_tag_rules = {
   add = {
     resource_type = "bucket"
   }
@@ -388,7 +388,7 @@ When merged, the resulting tag rules for S3 buckets will be:
 
 In this example:
 
-- The `add` map includes entries from both `base_tag_rules` and `s3_bucket_tag_rules`.
+- The `add` map includes entries from both `base_tag_rules` and `s3_buckets_tag_rules`.
 - The `remove` list is a concatenation of entries from both lists, ensuring no duplicates (`"ilike:secret%"` appears only once).
 - The `remove_except` list remains empty as specified in both rules.
 - The `update_keys` map merges entries, with the resource-specific rules for environment and owner overriding the base rules entirely.
